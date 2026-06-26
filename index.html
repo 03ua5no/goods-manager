@@ -1,0 +1,1498 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>グッズ管理</title>
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;background:#F7F7F6;font-family:-apple-system,'Helvetica Neue',Arial,sans-serif;}
+#app{display:flex;flex-direction:column;height:100vh;height:100dvh;max-width:430px;margin:0 auto;background:#F7F7F6;position:relative;}
+.hdr{background:#fff;border-bottom:0.5px solid #EBEBEB;padding:12px 14px;display:flex;align-items:center;gap:4px;flex-shrink:0;}
+.hdr h1{font-size:17px;font-weight:500;color:#111;flex:1;margin:0;}
+.back-btn{background:none;border:none;padding:4px 10px 4px 0;cursor:pointer;color:#111;font-size:20px;display:flex;align-items:center;}
+.content{flex:1;overflow-y:auto;overflow-x:hidden;padding:8px 14px 16px;-webkit-overflow-scrolling:touch;}
+.bnav{border-top:0.5px solid #EBEBEB;background:#fff;display:flex;flex-shrink:0;}
+.bnav-btn{flex:1;padding:12px 0 max(14px,env(safe-area-inset-bottom));background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;}
+.bnav-btn i{font-size:22px;}.bnav-btn.lg i{font-size:25px;}.bnav-btn span{font-size:10px;}
+.card{background:#fff;border-radius:12px;border:0.5px solid #EBEBEB;padding:12px 14px;margin-bottom:8px;}
+.card.tap:active{background:#f7f7f7;}
+input[type=text],input[type=number],select{border:0.5px solid #D8D8D8;border-radius:8px;padding:10px 12px;font-size:16px;width:100%;background:#fff;color:#111;font-family:inherit;outline:none;-webkit-appearance:none;appearance:none;}
+input:focus,select:focus{border-color:#111;box-shadow:0 0 0 3px rgba(0,0,0,.08);}
+select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23999' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:32px;}
+.bdg{font-size:11px;font-weight:500;padding:2px 8px;border-radius:100px;display:inline-block;white-space:nowrap;}
+.bdg-have{background:#E1F5EE;color:#0F6E56;}.bdg-want{background:#FBEAF0;color:#993556;}
+.bdg-qty{background:#E6F1FB;color:#185FA5;}.bdg-trade{background:#FEF3C7;color:#B45309;}
+.bdg-share{background:#D1FAE5;color:#065F46;}.bdg-sub{background:#EEEDFE;color:#534AB7;}
+.avatar{border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:500;flex-shrink:0;}
+.btn-primary{width:100%;padding:13px;border-radius:8px;border:none;background:#1A1A1A;color:#fff;font-size:15px;font-weight:500;cursor:pointer;font-family:inherit;}
+.btn-primary:active{background:#333;}
+.btn-toggle{flex:1;padding:9px;border-radius:8px;border:0.5px solid #D8D8D8;background:#fff;cursor:pointer;font-size:14px;color:#888;font-family:inherit;}
+.btn-toggle.active{border-color:#111;background:#F0F0EF;color:#111;font-weight:500;}
+.btn-label{padding:7px 16px;border-radius:8px;border:0.5px solid #D8D8D8;background:#fff;cursor:pointer;font-size:13px;color:#888;font-family:inherit;}
+.btn-label.at{border-color:#B45309;background:#FEF3C7;color:#B45309;font-weight:500;}
+.btn-label.as{border-color:#065F46;background:#D1FAE5;color:#065F46;font-weight:500;}
+.btn-add-row{width:100%;padding:10px;border-radius:8px;border:0.5px dashed #D0D0D0;background:none;cursor:pointer;font-size:14px;color:#888;margin-bottom:8px;display:flex;align-items:center;justify-content:center;gap:6px;font-family:inherit;}
+.btn-add-row:active{background:#f5f5f5;}
+.btn-icon{background:none;border:none;cursor:pointer;color:#bbb;padding:4px 6px;font-size:18px;display:flex;align-items:center;}
+.btn-icon:active{color:#666;}
+.btn-qty{width:38px;height:38px;border-radius:50%;border:0.5px solid #D8D8D8;background:none;cursor:pointer;font-size:22px;color:#111;display:flex;align-items:center;justify-content:center;font-family:inherit;}
+.btn-qty:active{background:#f0f0f0;}
+.btn-add-sm{padding:8px 14px;border:0.5px solid #D8D8D8;border-radius:8px;background:none;cursor:pointer;color:#111;white-space:nowrap;font-size:14px;font-family:inherit;}
+.btn-add-sm:active{background:#f0f0f0;}
+.sub-btn{padding:8px 0;border-radius:8px;border:0.5px solid #D8D8D8;background:#fff;cursor:pointer;font-size:14px;color:#888;font-family:inherit;flex:1;text-align:center;}
+.sub-btn.active{border-color:#111;background:#F0F0EF;color:#111;font-weight:500;}
+.lbl{font-size:12px;color:#888;font-weight:500;display:block;margin-top:16px;margin-bottom:5px;}
+.sec-head{font-size:11px;color:#999;font-weight:500;margin-top:16px;margin-bottom:6px;padding-left:2px;letter-spacing:.3px;}
+.empty{text-align:center;color:#aaa;font-size:14px;margin-top:52px;line-height:1.9;padding:0 20px;}
+.tabs{display:flex;background:#fff;border-bottom:0.5px solid #EBEBEB;margin:-8px -14px 10px;padding:0 14px;}
+.tab-btn{flex:1;padding:11px 0;background:none;border:none;border-bottom:2px solid transparent;cursor:pointer;font-size:14px;color:#aaa;font-family:inherit;font-weight:400;margin-bottom:-0.5px;}
+.tab-btn.active{color:#111;border-bottom-color:#111;font-weight:500;}
+.grp-hdr{font-size:12px;color:#999;font-weight:500;padding:10px 2px 5px;display:flex;align-items:center;gap:8px;}
+.grp-hdr::after{content:'';flex:1;height:0.5px;background:#EBEBEB;}
+.grid-wrap{background:#fff;border-radius:12px;border:0.5px solid #EBEBEB;margin-bottom:10px;overflow:hidden;}
+.grid-title{font-size:14px;font-weight:500;color:#111;padding:12px 14px 0;}
+.g-table{width:100%;border-collapse:collapse;}
+.g-th{text-align:center;font-size:12px;color:#888;font-weight:500;padding:8px 4px;border-bottom:0.5px solid #F0F0EF;}
+.g-name-th{width:74px;padding:8px 10px;border-bottom:0.5px solid #F0F0EF;}
+.g-td{text-align:center;padding:8px 4px;border-bottom:0.5px solid #F5F5F5;}
+.g-name-td{padding:8px 10px;border-bottom:0.5px solid #F5F5F5;}
+.g-tr:last-child .g-td,.g-tr:last-child .g-name-td{border-bottom:none;}
+.g-cell{cursor:pointer;min-height:38px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;}
+.g-circle{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:500;}
+.g-circle-have{border:1.5px solid #1D9E75;background:#E1F5EE;color:#0F6E56;}
+.g-circle-want{border:1.5px solid #D4537E;background:transparent;color:transparent;}
+.g-circle-empty{border:1.5px dashed #D8D8D8;background:transparent;}
+.g-icons{display:flex;gap:2px;justify-content:center;}
+.g-icon-t{font-size:9px;background:#FEF3C7;color:#B45309;padding:1px 3px;border-radius:3px;line-height:1.4;}
+.g-icon-s{font-size:9px;background:#D1FAE5;color:#065F46;padding:1px 3px;border-radius:3px;line-height:1.4;}
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="hdr">
+    <button class="back-btn" id="backBtn" style="display:none" onclick="goBack()">←</button>
+    <h1 id="hdrTitle">グッズから見る</h1>
+  </div>
+  <div class="content" id="content"></div>
+  <div class="bnav" id="bnav">
+    <button class="bnav-btn" onclick="setTab('goods')"><span id="ni-goods" style="font-size:20px;color:#111">▤</span><span id="nl-goods" style="color:#111;font-weight:500">グッズ</span></button>
+    <button class="bnav-btn" onclick="setTab('member')"><span id="ni-member" style="font-size:20px;color:#aaa">◎</span><span id="nl-member" style="color:#aaa">メンバー</span></button>
+    <button class="bnav-btn" onclick="setTab('settings')"><span id="ni-settings" style="font-size:20px;color:#aaa">⚙</span><span id="nl-settings" style="color:#aaa">設定</span></button>
+  </div>
+  <button id="fab" onclick="openFab()" style="display:none;position:absolute;bottom:74px;right:16px;width:52px;height:52px;border-radius:50%;background:#1A1A1A;border:none;cursor:pointer;color:#fff;font-size:24px;box-shadow:0 4px 12px rgba(0,0,0,.22);display:flex;align-items:center;justify-content:center;z-index:10;line-height:1">＋</button>
+</div>
+<script>
+const PAL=['#7F77DD','#D4537E','#1D9E75','#D85A30','#378ADD','#BA7517','#639922','#E24B4A'];
+const GROUP_PAL=['#7F77DD','#D4537E','#1D9E75','#D85A30','#378ADD','#BA7517','#9333EA','#0891B2','#DC2626','#639922'];
+const SHO=['ヨリ','チュウ','スワリ','ヒキ'];
+const uid=()=>Math.random().toString(36).slice(2,9)+Date.now().toString(36).slice(-3);
+
+function groupColor(g){return(typeof g==='object'?g?.color:data.groups.find(x=>x.id===g)?.color)||'#7F77DD';}
+function groupBadge(g){const name=typeof g==='object'?g?.name:data.groups.find(x=>x.id===g)?.name||'';const c=groupColor(g);return`<span style="font-size:11px;background:${c}22;color:${c};padding:2px 9px;border-radius:100px;font-weight:500">${esc(name)}</span>`;}
+function setGroupColor(id,color){data.groups=data.groups.map(g=>g.id===id?{...g,color}:g);saveData();document.getElementById('content').innerHTML=renderSettingsMembers();}
+
+function loadData(){
+  try{
+    const raw=localStorage.getItem('goods-mgr-v2')||localStorage.getItem('goods-mgr-v1');
+    const d=JSON.parse(raw);
+    if(d&&d.members){
+      if(!d.groups)d.groups=[];
+      d.goodsTypes=d.goodsTypes.map(g=>g.name==='生写真'&&!g.subTypes?{...g,subTypes:SHO}:g);
+  d.goodsTypes=d.goodsTypes.map(g=>({titles:[],  ...g}));
+      return d;
+    }
+  }catch{}
+  return{groups:[],members:[],goodsTypes:[{id:'g1',name:'生写真',subTypes:SHO},{id:'g2',name:'缶バッジ'},{id:'g3',name:'トレカ'},{id:'g4',name:'ステッカー'},{id:'g5',name:'クーポン'}],items:[]};
+}
+function saveData(){try{localStorage.setItem('goods-mgr-v2',JSON.stringify(data));}catch{}}
+
+let data=loadData(),tab='goods',view=null,editing=null,dtab='have',actionItemId=null,openAccordions=new Set(),mdFilter='all',gdGroupFilter=null,mlGroupFilter=null,settingEdit=null,settingsTab=null,membersSettingsTab=null,settingsEditMode=false,pendingDelete=null,bulkMode=false;
+
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function av(n,c,sz=36){return`<div class="avatar" style="width:${sz}px;height:${sz}px;background:${c}22;font-size:${Math.round(sz*.38)}px;color:${c}">${esc(n?.[0]??'?')}</div>`;}
+function mc(i){return PAL[i>=0?i%PAL.length:0];}
+function sb(s){return s==='have'?`<span class="bdg bdg-have">持ってる</span>`:`<span class="bdg bdg-want">欲しい</span>`;}
+function lb(l){return l==='trade'?`<span class="bdg bdg-trade">トレード用</span>`:`<span class="bdg bdg-share">お裾分け用</span>`;}
+function ib(item){
+  let h=sb(item.status);
+  if(item.subType)h+=`<span class="bdg bdg-sub">${esc(item.subType)}</span>`;
+  if(item.status==='have'&&item.quantity>1)h+=`<span class="bdg bdg-qty">${item.quantity}</span>`;
+  (item.labels||[]).forEach(l=>h+=lb(l));
+  return h;
+}
+
+// ── render dispatcher ──
+function render(){
+  const showBack=!!(bulkMode||editing||view||settingsTab);
+  document.getElementById('backBtn').style.display=showBack?'':'none';
+  document.getElementById('bnav').style.display=(editing||bulkMode)?'none':'flex';
+  let title='',html='';
+  if(bulkMode){title='まとめて登録';html=renderBulkForm();}
+  else if(editing!==null){title=editing.id?'編集':'グッズ登録';html=renderForm(editing);}
+  else if(view){
+    if(view.type==='goods'){const gt=data.goodsTypes.find(g=>g.id===view.id);title=gt?.name??'';html=renderGD(view.id);}
+    else{const m=data.members.find(m=>m.id===view.id);title=m?.name??'';html=renderMD(view.id);}
+  }else if(tab==='goods'){title='グッズから見る';html=renderGL();}
+  else if(tab==='member'){title='メンバーから見る';html=renderML();}
+
+  else{
+    if(settingsTab==='members'){title='グループ・メンバー';html=renderSettingsMembers();}
+    else if(settingsTab==='goodsTypes'){title='グッズの種類';html=renderSettingsGoods();}
+    else{title='設定';html=renderSettingsTop();}
+  }
+  document.getElementById('hdrTitle').textContent=title;
+  document.getElementById('content').innerHTML=html;
+  navHL();attachEv();
+  document.getElementById('content').scrollTop=0;
+}
+function navHL(){
+  ['goods','member','settings'].forEach(t=>{
+    const a=t===tab&&!view&&!editing&&!settingsTab&&!bulkMode;
+    const el=document.getElementById('ni-'+t);if(!el)return;
+    el.style.color=a?'#111':'#aaa';
+    const nl=document.getElementById('nl-'+t);nl.style.color=a?'#111':'#aaa';nl.style.fontWeight=a?'500':'400';
+  });
+  const fab=document.getElementById('fab');
+  if(fab){
+    const showFab=(tab==='goods'&&!editing&&!bulkMode)||(tab==='member'&&!editing&&!bulkMode&&view?.type==='member');
+    fab.style.display=showFab?'flex':'none';
+  }
+}
+function openFab(){
+  if(view?.type==='member'){
+    const d={memberId:view.id,goodsTypeId:'',status:'have',quantity:1,labels:[],title:''};
+    startAdd(d);
+  }else{
+    window._bfGtId=view?.type==='goods'?view.id:null;
+    bulkMode=true;
+    render();
+  }
+}
+
+function gdGroupTabs(){
+  if(!data.groups.length)return'';
+  const tabs=[{id:null,name:'すべて'},...data.groups];
+  return`<div style="display:flex;gap:6px;overflow-x:auto;padding-bottom:2px;margin-bottom:10px;-webkit-overflow-scrolling:touch;scrollbar-width:none">
+    ${tabs.map(g=>{
+      const active=gdGroupFilter===g.id;
+      const c=g.id?groupColor(g):'#7F77DD';
+      return`<button onclick="setGdGroupFilter(${g.id===null?'null':`'${g.id}'`})" style="padding:5px 14px;border-radius:100px;border:0.5px solid ${active?c:'rgba(0,0,0,.15)'};background:${active?c+'22':'none'};color:${active?c:'#888'};font-size:12px;font-weight:${active?500:400};cursor:pointer;font-family:inherit;white-space:nowrap;flex-shrink:0">${esc(g.name)}</button>`;
+    }).join('')}
+  </div>`;
+}
+function setGdGroupFilter(gId){gdGroupFilter=gId;actionItemId=null;document.getElementById('content').innerHTML=renderGD(view.id);}
+function sortMembers(ms){
+  return [...ms].sort((a,b)=>{
+    const gd=(a.gen||999)-(b.gen||999);
+    return gd!==0?gd:(a.name||'').localeCompare(b.name||'','ja');
+  });
+}
+function sortMemberIds(mIds){
+  return [...mIds].sort((a,b)=>{
+    const ma=data.members.find(m=>m.id===a),mb=data.members.find(m=>m.id===b);
+    const gd=(ma?.gen||999)-(mb?.gen||999);
+    return gd!==0?gd:(ma?.name||'').localeCompare(mb?.name||'','ja');
+  });
+}
+function membersInGroup(gId){
+  const ms=gId===null?data.members:data.members.filter(m=>m.groupId===gId);
+  return sortMembers(ms);
+}
+
+// ── bulk registration form ──
+function renderBulkForm(){
+  if(!data.members.length)return`<p class="empty">先に設定からメンバーを<br>追加してください</p>`;
+  if(!data.goodsTypes.length)return`<p class="empty">先に設定からグッズの種類を<br>追加してください</p>`;
+  const go=data.goodsTypes.map(g=>`<option value="${g.id}">${esc(g.name)}</option>`).join('');
+  const selGtId=document.getElementById('bfG')?.value||'';
+  const curGtId=window._bfGtId||'';
+  const gtId=selGtId||curGtId||data.goodsTypes[0]?.id||'';
+  window._bfGtId=gtId;
+  const gt=data.goodsTypes.find(g=>g.id===gtId);
+  const subTypes=gt?.subTypes||[];
+
+  // タブ定義
+  const hasGroups=data.groups.length>0;
+  const bfTab=window._bfMTab||'__all__';
+  const tabs=hasGroups?[{id:'__all__',name:'すべて'},...data.groups]:[];
+
+  // 表示するメンバー（タブで絞り込み）
+  let tabMembers;
+  if(!hasGroups||bfTab==='__all__'){
+    tabMembers=sortMembers(data.members);
+  }else{
+    tabMembers=sortMembers(data.members.filter(m=>m.groupId===bfTab));
+  }
+
+  const tabsHtml=hasGroups?`<div style="display:flex;gap:0;overflow-x:auto;margin-bottom:10px;border-bottom:0.5px solid #EBEBEB;-webkit-overflow-scrolling:touch;scrollbar-width:none">
+    ${tabs.map(t=>{
+      const active=bfTab===t.id;
+      const color=t.id==='__all__'?'#111':groupColor(t);
+      return`<button onclick="window._bfMTab='${t.id}';bfRenderMembers()" style="padding:8px 14px;background:none;border:none;border-bottom:2px solid ${active?color:'transparent'};cursor:pointer;font-size:13px;color:${active?color:'#aaa'};font-weight:${active?'600':'400'};white-space:nowrap;font-family:inherit;flex-shrink:0">${esc(t.name)}</button>`;
+    }).join('')}
+  </div>`:'';
+
+  let rows='';
+  tabMembers.forEach(m=>{
+    const idx=data.members.findIndex(x=>x.id===m.id);
+    const color=mc(idx);
+    const cbId=`bfm_${m.id}`;
+    if(subTypes.length){
+      rows+=`<div style="background:#fff;border-radius:10px;border:0.5px solid #EBEBEB;padding:10px 12px;margin-bottom:6px">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+          <input type="checkbox" id="${cbId}" onchange="bfToggleMember('${m.id}')" style="width:18px;height:18px;cursor:pointer;accent-color:#1A1A1A;flex-shrink:0">
+          ${av(m.name,color,28)}
+          <label for="${cbId}" style="font-size:14px;font-weight:500;color:#111;cursor:pointer;flex:1">${esc(m.name)}${m.gen?`<span style="font-size:10px;background:#f0f0f0;color:#777;border-radius:100px;padding:1px 5px;margin-left:4px;font-weight:400">${m.gen}期</span>`:''}</label>
+        </div>
+        <div id="bfst_${m.id}" style="display:none;padding-left:26px">
+          <div style="display:flex;gap:5px;flex-wrap:wrap">${subTypes.map(st=>`<label style="display:flex;align-items:center;gap:4px;padding:5px 10px;border-radius:7px;border:0.5px solid #D8D8D8;background:#fff;cursor:pointer;font-size:12px;color:#555;font-family:inherit"><input type="checkbox" name="bfst_${m.id}" value="${esc(st)}" style="accent-color:#1A1A1A;cursor:pointer">${esc(st)}</label>`).join('')}</div>
+        </div>
+      </div>`;
+    }else{
+      rows+=`<div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:#fff;border-radius:10px;border:0.5px solid #EBEBEB;margin-bottom:6px">
+        <input type="checkbox" id="${cbId}" style="width:18px;height:18px;cursor:pointer;accent-color:#1A1A1A;flex-shrink:0">
+        ${av(m.name,color,28)}
+        <label for="${cbId}" style="font-size:14px;font-weight:500;color:#111;cursor:pointer;flex:1">${esc(m.name)}${m.gen?`<span style="font-size:10px;background:#f0f0f0;color:#777;border-radius:100px;padding:1px 5px;margin-left:4px;font-weight:400">${m.gen}期</span>`:''}</label>
+      </div>`;
+    }
+  });
+
+  return`<div style="padding-bottom:20px">
+    <label class="lbl">グッズの種類</label>
+    <select id="bfG" onchange="window._bfGtId=this.value;document.getElementById('content').innerHTML=renderBulkForm()" style="border:0.5px solid #D8D8D8;border-radius:8px;padding:10px 12px;font-size:16px;width:100%;background:#fff;color:#111;font-family:inherit;outline:none;-webkit-appearance:none;appearance:none;background-image:url('data:image/svg+xml,%3Csvg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'12\\' height=\\'12\\' viewBox=\\'0 0 24 24\\' fill=\\'none\\' stroke=\\'%23999\\' stroke-width=\\'2\\'%3E%3Cpath d=\\'M6 9l6 6 6-6\\'/%3E%3C/svg%3E');background-repeat:no-repeat;background-position:right 12px center;padding-right:32px">
+      ${data.goodsTypes.map(g=>`<option value="${g.id}"${g.id===gtId?' selected':''}>${esc(g.name)}</option>`).join('')}
+    </select>
+    <label class="lbl">タイトル（任意）</label>
+    <div style="position:relative">
+      <input type="text" id="bfTitle" value="${esc(window._bfPresetTitle||'')}" placeholder="例：2024ライブ衣装" autocomplete="off" ${window._bfPresetTitle!==undefined?`readonly style="border:0.5px solid #D8D8D8;border-radius:8px;padding:10px 12px;font-size:16px;width:100%;background:#F7F7F6;color:#555;font-family:inherit;outline:none;-webkit-appearance:none"`:`oninput="showTitleSug('bfTitle','bfTitleSug',window._bfGtId||document.getElementById('bfG')?.value)" onfocus="showTitleSug('bfTitle','bfTitleSug',window._bfGtId||document.getElementById('bfG')?.value)" onblur="setTimeout(()=>{const el=document.getElementById('bfTitleSug');if(el)el.style.display='none'},180)" style="border:0.5px solid #D8D8D8;border-radius:8px;padding:10px 12px;font-size:16px;width:100%;background:#fff;color:#111;font-family:inherit;outline:none;-webkit-appearance:none"`}>
+      <div id="bfTitleSug" style="display:none;position:absolute;top:100%;left:0;right:0;background:#fff;border:0.5px solid #D8D8D8;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,.1);z-index:20;overflow:hidden;margin-top:3px"></div>
+    </div>
+    <label class="lbl">ステータス</label>
+    <div style="display:flex;gap:8px">
+      <button class="btn-toggle active" id="bfBtnH" onclick="bfSetSt('have')">持ってる</button>
+      <button class="btn-toggle" id="bfBtnW" onclick="bfSetSt('want')">欲しい</button>
+    </div>
+    <input type="hidden" id="bfSt" value="have">
+    <label class="lbl" style="margin-top:16px">メンバーを選択</label>
+    <div style="display:flex;justify-content:flex-end;margin-bottom:6px">
+      <button onclick="bfSelectAll(true)" style="background:none;border:none;cursor:pointer;font-size:12px;color:#378ADD;padding:0;font-family:inherit">全選択</button>
+      <span style="color:#ddd;margin:0 6px;font-size:12px">|</span>
+      <button onclick="bfSelectAll(false)" style="background:none;border:none;cursor:pointer;font-size:12px;color:#888;padding:0;font-family:inherit">全解除</button>
+    </div>
+    <div id="bfMemberArea">
+      ${tabsHtml}
+      <div id="bfMemberRows">${rows}</div>
+    </div>
+    <button onclick="submitBulkF()" style="width:100%;padding:13px;border-radius:8px;border:none;background:#1A1A1A;color:#fff;font-size:15px;font-weight:500;cursor:pointer;font-family:inherit;margin-top:16px">まとめて登録する</button>
+  </div>`;
+}
+
+function bfToggleMember(mId){
+  const cb=document.getElementById('bfm_'+mId);
+  const stDiv=document.getElementById('bfst_'+mId);
+  if(stDiv)stDiv.style.display=cb.checked?'block':'none';
+}
+function bfRenderMembers(){
+  // チェック状態を保存
+  const checked={};
+  document.querySelectorAll('[id^="bfm_"]').forEach(cb=>{
+    const mId=cb.id.replace('bfm_','');
+    checked[mId]=cb.checked;
+    // サブタイプのチェックも保存
+    const subs=[...document.querySelectorAll(`input[name="bfst_${mId}"]:checked`)].map(x=>x.value);
+    if(subs.length)checked['st_'+mId]=subs;
+  });
+  window._bfChecked=Object.assign(window._bfChecked||{},checked);
+
+  const gtId=window._bfGtId||'';
+  const gt=data.goodsTypes.find(g=>g.id===gtId);
+  const subTypes=gt?.subTypes||[];
+  const bfTab=window._bfMTab||'__all__';
+  const hasGroups=data.groups.length>0;
+  const tabs=hasGroups?[{id:'__all__',name:'すべて'},...data.groups]:[];
+
+  let tabMembers;
+  if(!hasGroups||bfTab==='__all__'){
+    tabMembers=sortMembers(data.members);
+  }else{
+    tabMembers=sortMembers(data.members.filter(m=>m.groupId===bfTab));
+  }
+
+  const tabsHtml=hasGroups?`<div style="display:flex;gap:0;overflow-x:auto;margin-bottom:10px;border-bottom:0.5px solid #EBEBEB;-webkit-overflow-scrolling:touch;scrollbar-width:none">
+    ${tabs.map(t=>{
+      const active=bfTab===t.id;
+      const color=t.id==='__all__'?'#111':groupColor(t);
+      return`<button onclick="window._bfMTab='${t.id}';bfRenderMembers()" style="padding:8px 14px;background:none;border:none;border-bottom:2px solid ${active?color:'transparent'};cursor:pointer;font-size:13px;color:${active?color:'#aaa'};font-weight:${active?'600':'400'};white-space:nowrap;font-family:inherit;flex-shrink:0">${esc(t.name)}</button>`;
+    }).join('')}
+  </div>`:'';
+
+  let rows='';
+  const saved=window._bfChecked||{};
+  tabMembers.forEach(m=>{
+    const idx=data.members.findIndex(x=>x.id===m.id);
+    const color=mc(idx);
+    const cbId=`bfm_${m.id}`;
+    const isChecked=!!saved[m.id];
+    const savedSubs=saved['st_'+m.id]||[];
+    if(subTypes.length){
+      rows+=`<div style="background:#fff;border-radius:10px;border:0.5px solid #EBEBEB;padding:10px 12px;margin-bottom:6px">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+          <input type="checkbox" id="${cbId}" ${isChecked?'checked':''} onchange="bfToggleMember('${m.id}')" style="width:18px;height:18px;cursor:pointer;accent-color:#1A1A1A;flex-shrink:0">
+          ${av(m.name,color,28)}
+          <label for="${cbId}" style="font-size:14px;font-weight:500;color:#111;cursor:pointer;flex:1">${esc(m.name)}${m.gen?`<span style="font-size:10px;background:#f0f0f0;color:#777;border-radius:100px;padding:1px 5px;margin-left:4px;font-weight:400">${m.gen}期</span>`:''}</label>
+        </div>
+        <div id="bfst_${m.id}" style="display:${isChecked?'block':'none'};padding-left:26px">
+          <div style="display:flex;gap:5px;flex-wrap:wrap">${subTypes.map(st=>`<label style="display:flex;align-items:center;gap:4px;padding:5px 10px;border-radius:7px;border:0.5px solid #D8D8D8;background:#fff;cursor:pointer;font-size:12px;color:#555;font-family:inherit"><input type="checkbox" name="bfst_${m.id}" value="${esc(st)}" ${savedSubs.includes(st)?'checked':''} style="accent-color:#1A1A1A;cursor:pointer">${esc(st)}</label>`).join('')}</div>
+        </div>
+      </div>`;
+    }else{
+      rows+=`<div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:#fff;border-radius:10px;border:0.5px solid #EBEBEB;margin-bottom:6px">
+        <input type="checkbox" id="${cbId}" ${isChecked?'checked':''} style="width:18px;height:18px;cursor:pointer;accent-color:#1A1A1A;flex-shrink:0">
+        ${av(m.name,color,28)}
+        <label for="${cbId}" style="font-size:14px;font-weight:500;color:#111;cursor:pointer;flex:1">${esc(m.name)}${m.gen?`<span style="font-size:10px;background:#f0f0f0;color:#777;border-radius:100px;padding:1px 5px;margin-left:4px;font-weight:400">${m.gen}期</span>`:''}</label>
+      </div>`;
+    }
+  });
+
+  document.getElementById('bfMemberArea').innerHTML=tabsHtml+`<div id="bfMemberRows">${rows}</div>`;
+}
+function bfSetSt(s){
+  document.getElementById('bfSt').value=s;
+  document.getElementById('bfBtnH').className='btn-toggle'+(s==='have'?' active':'');
+  document.getElementById('bfBtnW').className='btn-toggle'+(s==='want'?' active':'');
+}
+function bfSelectAll(v){
+  document.querySelectorAll('[id^="bfm_"]').forEach(cb=>{
+    cb.checked=v;
+    const mId=cb.id.replace('bfm_','');
+    const stDiv=document.getElementById('bfst_'+mId);
+    if(stDiv)stDiv.style.display=v?'block':'none';
+  });
+}
+function submitBulkF(){
+  const gtId=window._bfGtId||document.getElementById('bfG')?.value;
+  if(!gtId){alert('グッズの種類を選んでください');return;}
+  const gt=data.goodsTypes.find(g=>g.id===gtId);
+  const status=document.getElementById('bfSt').value;
+  const title=document.getElementById('bfTitle')?.value.trim()||'';
+  const subTypes=gt?.subTypes||[];
+  let count=0;
+  data.members.forEach(m=>{
+    const cb=document.getElementById('bfm_'+m.id);
+    if(!cb||!cb.checked)return;
+    if(subTypes.length){
+      const checked=[...document.querySelectorAll(`input[name="bfst_${m.id}"]:checked`)].map(x=>x.value);
+      if(!checked.length)return;
+      checked.forEach(st=>{
+        const exists=data.items.find(i=>i.memberId===m.id&&i.goodsTypeId===gtId&&i.subType===st&&(i.title||'')===(title));
+        if(!exists){data.items.push({id:uid(),memberId:m.id,goodsTypeId:gtId,status,quantity:1,labels:[],subType:st,title:title||undefined});count++;}
+      });
+    }else{
+      const exists=data.items.find(i=>i.memberId===m.id&&i.goodsTypeId===gtId&&(i.title||'')===(title));
+      if(!exists){data.items.push({id:uid(),memberId:m.id,goodsTypeId:gtId,status,quantity:1,labels:[],title:title||undefined});count++;}
+    }
+  });
+  if(!count){alert('登録するメンバーを選んでください\n（サブタイプがある場合はタイプも選択してください）');return;}
+  saveData();
+  bulkMode=false;
+  window._bfGtId=null;
+  window._bfMTab=undefined;
+  window._bfChecked={};
+  window._bfPresetTitle=undefined;
+  view={type:'goods',id:gtId};
+  render();
+  // 完了トースト
+  const toast=document.createElement('div');
+  toast.textContent=`${count}件を登録しました`;
+  toast.style.cssText='position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:#1A1A1A;color:#fff;padding:10px 20px;border-radius:100px;font-size:13px;z-index:100;white-space:nowrap;pointer-events:none;font-family:-apple-system,sans-serif';
+  document.body.appendChild(toast);
+  setTimeout(()=>toast.remove(),2200);
+}
+
+
+function renderGL(){
+  if(!data.goodsTypes.length)return`<p class="empty">設定からグッズの種類を追加してください</p>`;
+  let h='';
+  h+=data.goodsTypes.map(gt=>{
+    const hi=data.items.filter(i=>i.goodsTypeId===gt.id&&i.status==='have');
+    const hc=new Set(hi.map(i=>i.memberId)).size;
+    const wc=new Set(data.items.filter(i=>i.goodsTypeId===gt.id&&i.status==='want').map(i=>i.memberId+'|'+(i.title||''))).size;
+    const chips=hi.slice(0,5).map(item=>{const idx=data.members.findIndex(m=>m.id===item.memberId);const m=data.members[idx];const c=mc(idx);return`<span style="font-size:11px;background:${c}18;color:${c};padding:2px 7px;border-radius:100px;font-weight:500">${esc(m?.name??'?')}</span>`;}).join('');
+    const more=hi.length>5?`<span style="font-size:11px;color:#bbb">+${hi.length-5}</span>`:'';
+    const bdgs=(hc>0?`<span class="bdg bdg-have">譲あり</span>`:'')+( wc>0?`<span class="bdg bdg-want">求 ${wc}</span>`:'');
+    return`<div class="card tap" style="cursor:pointer" onclick="openView('goods','${gt.id}')">
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <span style="font-size:16px;font-weight:500;color:#111">${esc(gt.name)}</span>
+        <div style="display:flex;gap:6px;align-items:center">${bdgs}›</div>
+      </div>
+    </div>`;
+  }).join('');
+  return h;
+}
+
+// ── member list ──
+function renderML(){
+  if(!data.members.length)return`<p class="empty">設定からメンバーを追加してください</p>`;
+
+  let h='';
+  if(data.groups.length){
+    const tabs=[{id:null,name:'全員'},...data.groups];
+    h+=`<div style="display:flex;gap:6px;overflow-x:auto;padding-bottom:2px;margin-bottom:10px;-webkit-overflow-scrolling:touch;scrollbar-width:none">
+      ${tabs.map(g=>{
+        const active=mlGroupFilter===g.id;
+        const c=g.id?groupColor(g):'#7F77DD';
+        return`<button onclick="setMlGroupFilter(${g.id===null?'null':`'${g.id}'`})" style="padding:5px 14px;border-radius:100px;border:0.5px solid ${active?c:'rgba(0,0,0,.15)'};background:${active?c+'22':'none'};color:${active?c:'#888'};font-size:12px;font-weight:${active?500:400};cursor:pointer;font-family:inherit;white-space:nowrap;flex-shrink:0">${esc(g.name)}</button>`;
+      }).join('')}
+    </div>`;
+  }
+
+  const filtered=membersInGroup(mlGroupFilter);
+  if(!filtered.length)return h+`<p class="empty">このグループにはメンバーがいません</p>`;
+
+  // 期ごとにグループ化
+  const genGroups=buildGenGroups(filtered);
+
+  if(genGroups.length<=1&&!genGroups[0]?.gen){
+    // 期情報なし→従来通り
+    const oshi=filtered.filter(m=>m.isOshi);
+    const others=filtered.filter(m=>!m.isOshi);
+    if(oshi.length){h+=`<div class="sec-head">★ 推しメン</div>`;h+=oshi.map(mCard).join('');if(others.length)h+=`<div class="sec-head">その他</div>`;}
+    h+=others.map(mCard).join('');
+  }else{
+    genGroups.forEach(grp=>{
+      const key=`ml_gen_${mlGroupFilter||'all'}_${grp.gen||'none'}`;
+      const open=!openAccordions.has('close_'+key);
+      const oshi=grp.members.filter(m=>m.isOshi);
+      const others=grp.members.filter(m=>!m.isOshi);
+      const label=grp.gen?`${grp.gen}期`:'期不明';
+      h+=`<div style="margin-bottom:8px">
+        <button onclick="toggleGenAccordion('${key}')" style="width:100%;display:flex;align-items:center;justify-content:space-between;padding:9px 12px;background:#fff;border:0.5px solid #EBEBEB;border-radius:${open?'10px 10px 0 0':'10px'};cursor:pointer;font-family:inherit;transition:border-radius .15s">
+          <span style="font-size:13px;font-weight:600;color:#555">${label}</span>
+          <div style="display:flex;align-items:center;gap:8px">
+            <span style="font-size:11px;color:#bbb">${grp.members.length}人</span>
+            <span style="font-size:12px;color:#bbb;transition:transform .2s;display:inline-block;transform:rotate(${open?'0':'180deg'})">${open?'▲':'▼'}</span>
+          </div>
+        </button>
+        ${open?`<div style="border:0.5px solid #EBEBEB;border-top:none;border-radius:0 0 10px 10px;overflow:hidden;background:#fff">
+          ${oshi.length?`<div class="sec-head" style="padding:8px 12px 3px">★ 推しメン</div>${oshi.map(mCard).join('')}`:''}
+          ${others.map(mCard).join('')}
+        </div>`:''}
+      </div>`;
+    });
+  }
+  return h;
+}
+
+function buildGenGroups(members){
+  const map=new Map();
+  members.forEach(m=>{
+    const g=m.gen||null;
+    if(!map.has(g))map.set(g,[]);
+    map.get(g).push(m);
+  });
+  // 期順（数値昇順、nullは末尾）
+  const sorted=[...map.entries()].sort((a,b)=>{
+    if(a[0]===null)return 1;if(b[0]===null)return-1;
+    return Number(a[0])-Number(b[0]);
+  });
+  return sorted.map(([gen,members])=>({gen,members}));
+}
+
+function toggleGenAccordion(key){
+  if(openAccordions.has('close_'+key))openAccordions.delete('close_'+key);
+  else openAccordions.add('close_'+key);
+  document.getElementById('content').innerHTML=tab==='member'?renderML():renderSettingsMembers();
+}
+
+function setMlGroupFilter(gId){mlGroupFilter=gId;document.getElementById('content').innerHTML=renderML();}
+function genBadge(m,small=false){if(!m?.gen)return'';const s=small?'font-size:9px;padding:1px 4px':'font-size:10px;padding:2px 6px';return`<span style="${s};background:#f0f0f0;color:#777;border-radius:100px;font-weight:500;white-space:nowrap">${m.gen}期</span>`;}
+function mCard(m){
+  const idx=data.members.findIndex(x=>x.id===m.id);const color=PAL[idx%PAL.length];
+  const have=data.items.filter(i=>i.memberId===m.id&&i.status==='have').length;
+  const want=data.items.filter(i=>i.memberId===m.id&&i.status==='want').length;
+  const oshiBadge=m.isOshi?`<span style="font-size:11px;background:#FEF3C7;color:#B45309;padding:2px 6px;border-radius:100px;font-weight:500;flex-shrink:0">★ 推し</span>`:'';
+  const grp=mlGroupFilter===null&&m.groupId?data.groups.find(g=>g.id===m.groupId):null;
+  const grpBadge=grp?groupBadge(grp):'';
+  return`<div class="card tap" style="display:flex;align-items:center;gap:10px;cursor:pointer" onclick="openView('member','${m.id}')">
+    ${av(m.name,color,38)}<div style="flex:1;min-width:0">
+      <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+        <span style="font-size:16px;font-weight:500;color:#111">${esc(m.name)}</span>${oshiBadge}${genBadge(m)}${grpBadge}
+      </div>
+      <div style="display:flex;gap:4px;margin-top:3px">${have>0?`<span class="bdg bdg-have">${have}種</span>`:''}${want>0?`<span class="bdg bdg-want">求 ${want}</span>`:''}</div>
+    </div>
+    ›
+  </div>`;
+}
+
+// ── goods detail ──
+function renderGD(gtId){
+  const gt=data.goodsTypes.find(g=>g.id===gtId);
+  if(gt?.subTypes?.length) return renderGrid(gtId,gt);
+
+  const groupMemberIds=new Set(membersInGroup(gdGroupFilter).map(m=>m.id));
+  const allItems=data.items.filter(i=>i.goodsTypeId===gtId&&groupMemberIds.has(i.memberId));
+  let h=gdGroupTabs();
+
+  // タイトル一覧（設定済み＋アイテムから収集）
+  const registeredTitles=(gt?.titles||[]);
+  const itemTitles=[];
+  allItems.forEach(i=>{const t=i.title||'';if(t&&!itemTitles.includes(t))itemTitles.push(t);});
+  // 設定済みタイトルを先に、それ以外のアイテムタイトルを後ろに追加
+  const allTitles=[...registeredTitles];
+  itemTitles.forEach(t=>{if(!allTitles.includes(t))allTitles.push(t);});
+  // ピン並び替え
+  const sortedTitles=sortTitles(allTitles,gt);
+  // タイトルなしアイテムは末尾に
+  const noTitleItems=allItems.filter(i=>!i.title);
+  if(noTitleItems.length)sortedTitles.push('');
+
+  if(!sortedTitles.length){
+    h+=`<p style="text-align:center;color:#bbb;font-size:14px;margin-top:24px">まだ登録がありません<br><span style="font-size:12px">設定でタイトルを追加するか、＋から登録してください</span></p>`;
+    return h;
+  }
+
+  sortedTitles.forEach(title=>{
+    const tItems=allItems.filter(i=>(i.title||'')===title);
+    const haveItems=tItems.filter(i=>i.status==='have');
+    const wantItems=tItems.filter(i=>i.status==='want');
+    const haveCount=new Set(haveItems.map(i=>i.memberId)).size;
+    const wantCount=new Set(wantItems.map(i=>i.memberId)).size;
+    const totalMembers=data.members.length;
+    const pinned=(gt?.pinnedTitles||[]).includes(title);
+    const accKey=`gd_title_${gtId}_${title}`;
+    const open=openAccordions.has(accKey);
+
+    // バッジ
+    const badges=(haveCount>0?`<span class="bdg bdg-have" style="font-size:11px">${haveCount}人所持</span> `:'')+
+                 (wantCount>0?`<span class="bdg bdg-want" style="font-size:11px">求 ${wantCount}人</span>`:'')+
+                 (tItems.length===0?`<span style="font-size:11px;color:#bbb">未登録</span>`:'');
+
+    h+=`<div style="margin-bottom:8px">
+      <div style="background:#fff;border:0.5px solid #EBEBEB;border-radius:${open?'10px 10px 0 0':'10px'};padding:11px 12px;display:flex;align-items:center;gap:8px;cursor:pointer" onclick="toggleGdTitle('${esc(gtId)}','${esc(title)}')">
+        <div style="flex:1;min-width:0">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px">
+            <span style="font-size:14px;font-weight:600;color:#111">${title?esc(title):'（タイトルなし）'}</span>
+            ${pinned?`<span style="color:#F59E0B;font-size:13px">★</span>`:''}
+          </div>
+          <div style="display:flex;gap:4px;flex-wrap:wrap">${badges}</div>
+        </div>
+        <button onclick="event.stopPropagation();openBulkForTitle('${esc(gtId)}','${esc(title)}')" style="background:#1A1A1A;border:none;border-radius:7px;cursor:pointer;color:#fff;font-size:18px;width:32px;height:32px;display:flex;align-items:center;justify-content:center;flex-shrink:0;line-height:1">＋</button>
+        <span style="font-size:12px;color:#bbb;flex-shrink:0">${open?'▲':'▼'}</span>
+      </div>
+      ${open?`<div style="background:#fff;border:0.5px solid #EBEBEB;border-top:none;border-radius:0 0 10px 10px;overflow:hidden">
+        ${renderGdTitleMembers(gtId,title,tItems)}
+      </div>`:''}
+    </div>`;
+  });
+
+  // タイトル追加ボタン（設定済みタイトルがない場合も表示）
+  h+=`<button onclick="openSettingsForGT('${esc(gtId)}')" style="width:100%;padding:11px;border-radius:8px;border:0.5px dashed #D0D0D0;background:none;cursor:pointer;font-size:13px;color:#aaa;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:5px;margin-top:4px">＋ タイトルを追加（設定から）</button>`;
+
+  return h;
+}
+
+function renderGdTitleMembers(gtId,title,tItems){
+  if(!tItems.length)return`<p style="text-align:center;color:#bbb;font-size:13px;padding:14px">まだ登録がありません</p>`;
+  const sortedItems=[...tItems].sort((a,b)=>{
+    const ia=data.members.findIndex(m=>m.id===a.memberId);
+    const ib=data.members.findIndex(m=>m.id===b.memberId);
+    return ia-ib;
+  });
+  let h='<table style="width:100%;border-collapse:collapse"><tbody>';
+  sortedItems.forEach(item=>{
+    const mId=item.memberId;
+    const idx=data.members.findIndex(m=>m.id===mId);
+    const member=data.members[idx];
+    const color=mc(idx);
+    h+=`<tr class="g-tr">
+      <td class="g-name-td">
+        <div style="display:flex;align-items:center;gap:6px">
+          ${av(member?.name,color,26)}
+          <div>
+            <div style="font-size:13px;font-weight:500;color:#111">${esc(member?.name||'?')}</div>
+            ${genBadge(member,true)}
+          </div>
+        </div>
+      </td>
+      <td class="g-td" style="width:56px">
+        <div class="g-cell" onclick="tapGdRow(this)" data-id="${item.id}" data-gt="${esc(gtId)}" data-m="${esc(mId)}" data-title="${esc(title)}">${cellHtml(item)}</div>
+      </td>
+    </tr>`;
+    if(actionItemId&&item.id===actionItemId){
+      const isHave=item.status==='have';const qty=item.quantity||1;
+      h+=`<tr><td colspan="2" style="padding:4px 14px 10px">
+        <div style="background:#F0F0EF;border-radius:8px;padding:8px 10px;display:flex;gap:5px;flex-wrap:wrap;align-items:center">
+          <span style="font-size:12px;color:#111;font-weight:500;flex:1">${isHave?`${qty}所持`:'欲しい'}</span>
+          ${isHave
+            ?`<button onclick="quickDecrease('${item.id}')" style="background:#fff;border:0.5px solid #BA7517;border-radius:6px;cursor:pointer;color:#BA7517;font-size:12px;font-weight:500;padding:5px 10px;font-family:inherit">－</button>
+              <button onclick="quickIncrease('${item.id}')" style="background:#1A1A1A;border:none;border-radius:6px;cursor:pointer;color:#fff;font-size:12px;font-weight:500;padding:5px 10px;font-family:inherit">＋</button>`
+            :`<button onclick="quickGet('${item.id}')" style="background:#1A1A1A;border:none;border-radius:6px;cursor:pointer;color:#fff;font-size:12px;font-weight:500;padding:5px 10px;font-family:inherit">＋</button>`
+          }
+          <button onclick="editItem('${item.id}')" style="background:#fff;border:0.5px solid #888;border-radius:6px;cursor:pointer;color:#444;font-size:12px;padding:5px 10px;font-family:inherit">編集</button>
+          <button onclick="delItem('${item.id}')" style="background:#fff;border:0.5px solid rgba(224,75,74,.4);border-radius:6px;cursor:pointer;color:#E24B4A;font-size:12px;padding:5px 10px;font-family:inherit">削除</button>
+          <button onclick="closeAction()" style="background:none;border:none;cursor:pointer;color:#aaa;font-size:16px;padding:2px 4px;line-height:1">×</button>
+        </div>
+      </td></tr>`;
+    }
+  });
+  h+=`</tbody></table>`;
+  return h;
+}
+
+function toggleGdTitle(gtId,title){
+  const key=`gd_title_${gtId}_${title}`;
+  if(openAccordions.has(key))openAccordions.delete(key);
+  else openAccordions.add(key);
+  actionItemId=null;
+  document.getElementById('content').innerHTML=renderGD(gtId);
+}
+
+function openBulkForTitle(gtId,title){
+  window._bfGtId=gtId;
+  window._bfPresetTitle=title;
+  window._bfMTab=undefined;
+  window._bfChecked={};
+  bulkMode=true;
+  render();
+}
+
+function openSettingsForGT(gtId){
+  window._gtExpanded=gtId;
+  settingsTab='goodsTypes';
+  tab='settings';
+  render();
+}
+
+function togglePinTitle(gtId,title){
+  data.goodsTypes=data.goodsTypes.map(g=>{
+    if(g.id!==gtId)return g;
+    const pins=g.pinnedTitles||[];
+    const pinned=pins.includes(title);
+    return{...g,pinnedTitles:pinned?pins.filter(t=>t!==title):[...pins,title]};
+  });
+  saveData();
+  document.getElementById('content').innerHTML=renderGD(gtId);
+}
+
+function sortTitles(titles,gt){
+  const pins=gt.pinnedTitles||[];
+  return [...titles].sort((a,b)=>{
+    const ap=pins.includes(a),bp=pins.includes(b);
+    if(ap&&!bp)return -1;
+    if(!ap&&bp)return 1;
+    return 0;
+  });
+}
+
+function pinBtn(gtId,title,gt){
+  const pinned=(gt.pinnedTitles||[]).includes(title);
+  return`<button onclick="togglePinTitle('${esc(gtId)}','${esc(title)}')" style="background:none;border:none;cursor:pointer;font-size:16px;padding:0 2px;color:${pinned?'#F59E0B':'#d1d5db'};flex-shrink:0;line-height:1">${pinned?'★':'☆'}</button>`;
+}
+
+function tapGdRow(el){
+  const itemId=el.dataset.id,mId=el.dataset.m,gtId=el.dataset.gt,title=el.dataset.title;
+  if(itemId){
+    actionItemId=(actionItemId===itemId)?null:itemId;
+    document.getElementById('content').innerHTML=renderGD(gtId);
+  }else{
+    actionItemId=null;
+    editing={goodsTypeId:gtId,memberId:mId,title:title,status:'have',quantity:1,labels:[]};
+    render();
+  }
+}
+
+// ── grid view ──
+function renderGrid(gtId,gt){
+  const groupMemberIds=new Set(membersInGroup(gdGroupFilter).map(m=>m.id));
+  const gtItems=data.items.filter(i=>i.goodsTypeId===gtId);
+  const tabs=gdGroupTabs();
+  let h=tabs;
+
+  // Filter items to visible members only
+  const filteredItems=gtItems.filter(i=>groupMemberIds.has(i.memberId));
+  if(!filteredItems.length)return h+`<p style="text-align:center;color:#bbb;font-size:14px;margin-top:24px">まだ登録がありません</p>`;
+
+  // Collect unique titles, pinned first
+  const rawTitles=[];
+  filteredItems.forEach(i=>{const t=i.title||'';if(!rawTitles.includes(t))rawTitles.push(t);});
+  const titles=sortTitles(rawTitles,gt);
+
+  titles.forEach(title=>{
+    const tItems=filteredItems.filter(i=>(i.title||'')===title);
+    const tableGroups=getTableGroups(tItems);
+    const showGroupBadge=gdGroupFilter===null&&data.groups.length>0;
+
+    tableGroups.forEach(tg=>{
+      h+=`<div class="grid-wrap">`;
+      h+=`<div class="grid-title" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">`;
+      if(title)h+=`<span>${esc(title)}</span>`;
+      if(showGroupBadge&&tg.name){const _g=data.groups.find(g=>g.name===tg.name);h+=groupBadge(_g||{name:tg.name,color:"#7F77DD"});}
+      h+=`<span style="flex:1"></span>${pinBtn(gtId,title,gt)}`;
+      h+=`</div>`;
+
+      h+=`<table class="g-table"><thead><tr>`;
+      h+=`<th class="g-name-th"></th>`;
+      gt.subTypes.forEach(st=>h+=`<th class="g-th">${esc(st)}</th>`);
+      h+=`</tr></thead><tbody>`;
+
+      sortMemberIds(tg.mIds).forEach(mId=>{
+        const idx=data.members.findIndex(m=>m.id===mId);
+        const member=data.members[idx];
+        const color=mc(idx);
+        h+=`<tr class="g-tr"><td class="g-name-td">
+          <div>
+            <div style="font-size:12px;color:#111;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(member?.name||'?')}</div>
+            ${genBadge(member,true)}
+          </div>
+        </td>`;
+        gt.subTypes.forEach(st=>{
+          const item=tItems.find(i=>i.memberId===mId&&i.subType===st);
+          const eTitle=esc(title);
+          h+=`<td class="g-td"><div class="g-cell" onclick="tapCell(this)" data-gt="${gtId}" data-m="${esc(mId)}" data-st="${esc(st)}" data-title="${eTitle}">${cellHtml(item)}</div></td>`;
+        });
+        h+=`</tr>`;
+        // Action row
+        if(actionItemId){
+          const aItem=data.items.find(i=>i.id===actionItemId&&i.memberId===mId&&i.goodsTypeId===gtId&&(i.title||'')===title);
+          if(aItem){
+            const qty=aItem.quantity||1;const isHave=aItem.status==='have';const colSpan=gt.subTypes.length+1;
+            h+=`<tr><td colspan="${colSpan}" style="padding:4px 10px 10px">
+              <div style="background:#F0F0EF;border-radius:8px;padding:8px 10px;display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+                <span style="font-size:12px;color:#111;font-weight:500;flex:1;white-space:nowrap">${isHave?`${qty}所持`:'欲しい'}</span>
+                ${isHave
+                  ?`<button onclick="quickDecrease('${aItem.id}')" style="background:#fff;border:0.5px solid #BA7517;border-radius:6px;cursor:pointer;color:#BA7517;font-size:12px;font-weight:500;padding:5px 10px;font-family:inherit;white-space:nowrap">－</button>
+                    <button onclick="quickIncrease('${aItem.id}')" style="background:#1A1A1A;border:none;border-radius:6px;cursor:pointer;color:#fff;font-size:12px;font-weight:500;padding:5px 10px;font-family:inherit;white-space:nowrap">＋</button>`
+                  :`<button onclick="quickGet('${aItem.id}')" style="background:#1A1A1A;border:none;border-radius:6px;cursor:pointer;color:#fff;font-size:12px;font-weight:500;padding:5px 10px;font-family:inherit;white-space:nowrap">＋</button>`
+                }
+                <button onclick="editItem('${aItem.id}')" style="background:#fff;border:0.5px solid #888;border-radius:6px;cursor:pointer;color:#444;font-size:12px;padding:5px 10px;font-family:inherit;white-space:nowrap">編集</button>
+                <button onclick="delItem('${aItem.id}')" style="background:#fff;border:0.5px solid rgba(224,75,74,.4);border-radius:6px;cursor:pointer;color:#E24B4A;font-size:12px;padding:5px 10px;font-family:inherit;white-space:nowrap">削除</button>
+                <button onclick="closeAction()" style="background:none;border:none;cursor:pointer;color:#aaa;font-size:16px;padding:2px 4px;font-family:inherit;line-height:1">×</button>
+              </div>
+            </td></tr>`;
+          }
+        }
+      });
+      h+=`</tbody></table></div>`;
+    });
+  });
+  return h;
+}
+
+function getTableGroups(tItems){
+  if(gdGroupFilter!==null||!data.groups.length){
+    const mIds=sortMemberIds([...new Set(tItems.map(i=>i.memberId))]);
+    return [{name:null,mIds}];
+  }
+  const result=[];
+  data.groups.forEach(g=>{
+    const gMIds=new Set(data.members.filter(m=>m.groupId===g.id).map(m=>m.id));
+    const mIds=sortMemberIds([...new Set(tItems.filter(i=>gMIds.has(i.memberId)).map(i=>i.memberId))]);
+    if(mIds.length)result.push({name:g.name,mIds});
+  });
+  const allGroupedIds=new Set(data.members.filter(m=>m.groupId&&data.groups.find(g=>g.id===m.groupId)).map(m=>m.id));
+  const ungroupedMIds=sortMemberIds([...new Set(tItems.filter(i=>!allGroupedIds.has(i.memberId)).map(i=>i.memberId))]);
+  if(ungroupedMIds.length)result.push({name:'グループなし',mIds:ungroupedMIds});
+  return result;
+}
+
+function cellHtml(item){
+  if(!item)return`<div class="g-circle g-circle-empty"></div>`;
+  const isHave=item.status==='have';
+  const qty=item.quantity||1;
+  const hasTrade=(item.labels||[]).includes('trade');
+  const hasShare=(item.labels||[]).includes('share');
+  const cClass=isHave?'g-circle g-circle-have':'g-circle g-circle-want';
+  let h=`<div class="${cClass}">${isHave?qty:''}</div>`;
+  if(hasTrade||hasShare){
+    h+=`<div class="g-icons">`;
+    if(hasTrade)h+=`<span class="g-icon-t">交</span>`;
+    if(hasShare)h+=`<span class="g-icon-s">裾</span>`;
+    h+=`</div>`;
+  }
+  return h;
+}
+
+function tapCell(el){
+  const gtId=el.dataset.gt,mId=el.dataset.m,st=el.dataset.st,title=el.dataset.title;
+  const item=data.items.find(i=>i.goodsTypeId===gtId&&i.memberId===mId&&i.subType===st&&(i.title||'')===title);
+  if(item){
+    actionItemId=(actionItemId===item.id)?null:item.id;
+    document.getElementById('content').innerHTML=renderGD(gtId);
+    return;
+  }
+  actionItemId=null;
+  editing={goodsTypeId:gtId,memberId:mId,subType:st,title:title,status:'have',quantity:1,labels:[]};
+  render();
+}
+
+function renderActionCard(item,gt){
+  const idx=data.members.findIndex(m=>m.id===item.memberId);
+  const member=data.members[idx];
+  const color=mc(idx);
+  const context=[item.title,item.subType].filter(Boolean).join(' / ');
+  const qty=item.quantity||1;
+  const afterQty=qty>1?`残り${qty-1}`:'削除されます';
+  const isHave=item.status==='have';
+  return`<div style="background:#fff;border-radius:12px;border:0.5px solid #EBEBEB;padding:14px;margin-bottom:10px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+      <div style="display:flex;align-items:center;gap:8px">
+        ${av(member?.name,color,32)}
+        <div>
+          <div style="font-size:15px;font-weight:500;color:#111">${esc(member?.name??'?')}</div>
+          ${context?`<div style="font-size:12px;color:#888;margin-top:1px">${esc(context)}</div>`:''}
+        </div>
+      </div>
+      <button onclick="closeAction()" style="background:none;border:none;cursor:pointer;color:#bbb;font-size:20px;display:flex;align-items:center;padding:4px">×</button>
+    </div>
+    <div style="display:flex;gap:8px">
+      ${isHave?`<button onclick="quickDecrease('${item.id}')" style="flex:1;padding:10px 8px;border-radius:8px;border:0.5px solid #BA7517;background:#fff;color:#BA7517;font-size:15px;font-weight:500;cursor:pointer;font-family:inherit">－</button>
+      <button onclick="quickIncrease('${item.id}')" style="flex:1;padding:10px 8px;border-radius:8px;border:none;background:#1A1A1A;color:#fff;font-size:15px;font-weight:500;cursor:pointer;font-family:inherit">＋</button>`:''}
+      <button onclick="editItem('${item.id}')" style="flex:1;padding:10px 8px;border-radius:8px;border:0.5px solid rgba(0,0,0,.2);background:#fff;font-size:13px;cursor:pointer;font-family:inherit;color:#111">編集</button>
+      <button onclick="delItem('${item.id}')" style="flex:1;padding:10px 8px;border-radius:8px;border:0.5px solid rgba(0,0,0,.15);background:#fff;font-size:13px;cursor:pointer;font-family:inherit;color:#E24B4A">削除</button>
+    </div>
+  </div>`;
+}
+
+function quickGet(id){
+  data.items=data.items.map(i=>i.id===id?{...i,status:'have',quantity:1}:i);
+  actionItemId=null;
+  saveData();
+  if(view)document.getElementById('content').innerHTML=view.type==='goods'?renderGD(view.id):renderMD(view.id);
+  else render();
+}
+
+function quickIncrease(id){
+  data.items=data.items.map(i=>i.id===id?{...i,quantity:(i.quantity||1)+1}:i);
+  saveData();
+  if(view)document.getElementById('content').innerHTML=view.type==='goods'?renderGD(view.id):renderMD(view.id);
+  else render();
+}
+
+function quickDecrease(id){
+  const item=data.items.find(i=>i.id===id);
+  if(!item)return;
+  if((item.quantity||1)>1){
+    data.items=data.items.map(i=>i.id===id?{...i,quantity:i.quantity-1}:i);
+  }else{
+    data.items=data.items.filter(i=>i.id!==id);
+  }
+  actionItemId=null;
+  saveData();
+  if(view)document.getElementById('content').innerHTML=view.type==='goods'?renderGD(view.id):renderMD(view.id);
+  else render();
+}
+
+function closeAction(){
+  actionItemId=null;
+  if(view)document.getElementById('content').innerHTML=view.type==='goods'?renderGD(view.id):renderMD(view.id);
+}
+
+// ── member detail (accordion) ──
+function renderMD(mId){
+  const member=data.members.find(m=>m.id===mId);
+  let baseItems=data.items.filter(i=>i.memberId===mId);
+  const filteredItems=mdFilter==='all'?baseItems:baseItems.filter(i=>i.status===mdFilter);
+
+  // Filter tabs
+  const filterBar=`<div style="display:flex;gap:6px;margin-bottom:10px">
+    ${['all','have','want'].map(f=>{
+      const label=f==='all'?'すべて':f==='have'?'持ってる':'欲しい';
+      const active=mdFilter===f;
+      return`<button onclick="setMdFilter('${f}')" style="padding:5px 12px;border-radius:100px;border:0.5px solid ${active?'#111':'rgba(0,0,0,.15)'};background:${active?'#F0F0EF':'none'};color:${active?'#111':'#888'};font-size:12px;font-weight:${active?500:400};cursor:pointer;font-family:inherit">${label}</button>`;
+    }).join('')}
+    ${member?.isOshi?`<span style="margin-left:auto;font-size:11px;background:#FEF3C7;color:#B45309;padding:4px 8px;border-radius:100px;font-weight:500;align-self:center">★ 推しメン</span>`:''}
+  </div>`;
+
+  let h=filterBar;
+  if(!filteredItems.length)return h+`<p style="text-align:center;color:#bbb;font-size:14px;margin-top:24px">${mdFilter==='have'?'持っているグッズはありません':mdFilter==='want'?'欲しいものはありません':'まだ登録がありません'}</p>`;
+
+  const gtIds=[];
+  filteredItems.forEach(i=>{if(!gtIds.includes(i.goodsTypeId))gtIds.push(i.goodsTypeId);});
+
+  gtIds.forEach(gtId=>{
+    const gt=data.goodsTypes.find(g=>g.id===gtId);
+    const gtItems=filteredItems.filter(i=>i.goodsTypeId===gtId);
+    const key=gtId+':'+mId+':'+mdFilter;
+    const isOpen=openAccordions.has(key);
+    const haveN=gtItems.filter(i=>i.status==='have').length;
+    const wantN=gtItems.filter(i=>i.status==='want').length;
+    h+=`<div class="card" style="padding:0;margin-bottom:8px;overflow:hidden">
+      <div onclick="toggleAcc('${gtId}','${mId}')" style="cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:12px 14px">
+        <div style="display:flex;align-items:center;gap:8px;flex:1;min-width:0">
+          <span style="font-size:15px;font-weight:500;color:#111">${esc(gt?.name||'?')}</span>
+          <span style="display:inline-flex;gap:4px">
+            ${haveN>0?`<span class="bdg bdg-have">${haveN}件</span>`:''}
+            ${wantN>0?`<span class="bdg bdg-want">求 ${wantN}</span>`:''}
+          </span>
+        </div>
+        <span style="font-size:11px;color:#bbb;flex-shrink:0">${isOpen?'▲':'▼'}</span>
+      </div>
+      ${isOpen?mdAccordionBody(gtItems,gt,mId):''}
+    </div>`;
+  });
+  return h;
+}
+
+function mdAccordionBody(gtItems,gt,mId){
+  const titles=[];
+  gtItems.forEach(i=>{const t=i.title||'';if(!titles.includes(t))titles.push(t);});
+  let h=`<div style="border-top:0.5px solid rgba(0,0,0,.08);padding:8px 14px 12px">`;
+
+  if(gt?.subTypes?.length){
+    // Grid format for subType goods (e.g. 生写真)
+    titles.forEach((title,ti)=>{
+      const tItems=gtItems.filter(i=>(i.title||'')===title);
+      h+=`<div${ti>0?' style="margin-top:20px"':''}>`;
+      if(title)h+=`<div style="font-size:14px;font-weight:500;color:#111;margin-bottom:6px">${esc(title)}</div>`;
+      h+=`<table style="width:100%;border-collapse:collapse"><thead><tr>`;
+      gt.subTypes.forEach(st=>h+=`<th style="text-align:center;font-size:12px;color:#888;font-weight:500;padding:6px 2px;border-bottom:0.5px solid rgba(0,0,0,.08);width:${100/gt.subTypes.length}%">${esc(st)}</th>`);
+      h+=`</tr></thead><tbody><tr>`;
+      gt.subTypes.forEach(st=>{
+        const item=tItems.find(i=>i.subType===st);
+        h+=`<td class="g-td" style="cursor:pointer"><div class="g-cell" onclick="tapMdCell(this)" data-m="${esc(mId)}" data-gt="${esc(gt.id)}" data-st="${esc(st)}" data-title="${esc(title)}">${cellHtml(item)}</div></td>`;
+      });
+      h+=`</tr>`;
+      // Inline action row
+      if(actionItemId){
+        const aItem=tItems.find(i=>i.id===actionItemId);
+        if(aItem){
+          const isHave=aItem.status==='have';const qty=aItem.quantity||1;
+          h+=`<tr><td colspan="${gt.subTypes.length}" style="padding:4px 0 6px">
+            <div style="background:#F0F0EF;border-radius:8px;padding:7px 10px;display:flex;gap:5px;align-items:center;flex-wrap:wrap">
+              <span style="font-size:12px;color:#111;font-weight:500;flex:1">${isHave?`${qty}所持`:'欲しい'}</span>
+              ${isHave
+                ?`<button onclick="quickDecrease('${aItem.id}')" style="background:#fff;border:0.5px solid #BA7517;border-radius:5px;cursor:pointer;color:#BA7517;font-size:11px;font-weight:500;padding:4px 8px;font-family:inherit;white-space:nowrap">－</button>
+                  <button onclick="quickIncrease('${aItem.id}')" style="background:#1A1A1A;border:none;border-radius:5px;cursor:pointer;color:#fff;font-size:11px;font-weight:500;padding:4px 8px;font-family:inherit;white-space:nowrap">＋</button>`
+                :`<button onclick="quickGet('${aItem.id}')" style="background:#1A1A1A;border:none;border-radius:5px;cursor:pointer;color:#fff;font-size:11px;font-weight:500;padding:4px 8px;font-family:inherit;white-space:nowrap">＋</button>`
+              }
+              <button onclick="editItem('${aItem.id}')" style="background:#fff;border:0.5px solid #888;border-radius:5px;cursor:pointer;color:#444;font-size:11px;padding:4px 8px;font-family:inherit;white-space:nowrap">編集</button>
+              <button onclick="delItem('${aItem.id}')" style="background:#fff;border:0.5px solid rgba(224,75,74,.4);border-radius:5px;cursor:pointer;color:#E24B4A;font-size:11px;padding:4px 8px;font-family:inherit;white-space:nowrap">削除</button>
+              <button onclick="closeAction()" style="background:none;border:none;cursor:pointer;color:#aaa;font-size:15px;padding:2px 4px;line-height:1">×</button>
+            </div>
+          </td></tr>`;
+        }
+      }
+      h+=`</tbody></table></div>`;
+    });
+  }else{
+    // Flat list for non-subType goods
+    titles.forEach((title,ti)=>{
+      const tItems=gtItems.filter(i=>(i.title||'')===title);
+      h+=`<div${ti>0?' style="margin-top:20px"':''}>`;
+      if(title)h+=`<div style="font-size:14px;font-weight:500;color:#111;margin-bottom:6px">${esc(title)}</div>`;
+      tItems.forEach(item=>h+=mdItemRow(item));
+      h+=`</div>`;
+    });
+  }
+  h+=`</div>`;
+  return h;
+}
+
+function tapMdCell(el){
+  const mId=el.dataset.m,gtId=el.dataset.gt,st=el.dataset.st,title=el.dataset.title;
+  const item=data.items.find(i=>i.memberId===mId&&i.goodsTypeId===gtId&&i.subType===st&&(i.title||'')===title);
+  if(item){
+    actionItemId=(actionItemId===item.id)?null:item.id;
+    document.getElementById('content').innerHTML=renderMD(mId);
+  }else{
+    actionItemId=null;
+    editing={memberId:mId,goodsTypeId:gtId,subType:st,title:title,status:'have',quantity:1,labels:[]};
+    render();
+  }
+}
+
+function mdItemRow(item){
+  const isHave=item.status==='have';
+  const qty=item.quantity||1;
+  const subLbl=item.subType?`<span style="font-size:13px;font-weight:500;color:#555;min-width:32px;flex-shrink:0">${esc(item.subType)}</span>`:'';
+  const badges=[
+    isHave?`<span class="bdg bdg-have">持ってる</span>`:`<span class="bdg bdg-want">欲しい</span>`,
+    isHave&&qty>1?`<span class="bdg bdg-qty">${qty}</span>`:'',
+    ...(item.labels||[]).map(l=>l==='trade'?`<span class="bdg bdg-trade">トレード用</span>`:`<span class="bdg bdg-share">お裾分け用</span>`)
+  ].join('');
+  const qBtn=isHave
+    ?`<div style="display:flex;gap:2px;flex-shrink:0">
+        <button onclick="quickDecrease('${item.id}')" style="background:#fff;border:0.5px solid #BA7517;border-radius:5px;cursor:pointer;color:#BA7517;font-size:10px;font-weight:500;padding:3px 7px;font-family:inherit">－</button>
+        <button onclick="quickIncrease('${item.id}')" style="background:none;border:0.5px solid #888;border-radius:5px;cursor:pointer;color:#444;font-size:10px;font-weight:500;padding:3px 7px;font-family:inherit">＋</button>
+      </div>`
+    :`<button onclick="quickGet('${item.id}')" style="background:#1A1A1A;border:none;border-radius:5px;cursor:pointer;color:#fff;font-size:10px;font-weight:500;padding:3px 7px;font-family:inherit;white-space:nowrap">＋</button>`;
+  return`<div style="display:flex;align-items:center;gap:6px;padding:7px 0;border-bottom:0.5px solid rgba(0,0,0,.05)">
+    ${subLbl}
+    <div style="flex:1;display:flex;gap:3px;flex-wrap:wrap;align-items:center">${badges}</div>
+    <div style="display:flex;gap:3px;flex-shrink:0">
+      ${qBtn}
+      <button onclick="editItem('${item.id}')" style="background:none;border:0.5px solid rgba(0,0,0,.2);border-radius:5px;cursor:pointer;color:#888;font-size:10px;padding:3px 7px;font-family:inherit;white-space:nowrap">編集</button>
+      <button onclick="delItem('${item.id}')" style="background:none;border:0.5px solid rgba(0,0,0,.15);border-radius:5px;cursor:pointer;color:#E24B4A;font-size:10px;padding:3px 7px;font-family:inherit;white-space:nowrap">削除</button>
+    </div>
+  </div>`;
+}
+
+function toggleAcc(gtId,mId){
+  const key=gtId+':'+mId+':'+mdFilter;
+  if(openAccordions.has(key))openAccordions.delete(key);
+  else openAccordions.add(key);
+  document.getElementById('content').innerHTML=renderMD(mId);
+}
+
+function setMdFilter(f){
+  mdFilter=f;
+  openAccordions=new Set();
+  if(view&&view.type==='member')document.getElementById('content').innerHTML=renderMD(view.id);
+}
+
+function toggleOshi(mId){
+  data.members=data.members.map(m=>m.id===mId?{...m,isOshi:!m.isOshi}:m);
+  saveData();render();
+}
+
+function tabsHtml(){return`<div class="tabs"><button class="tab-btn${dtab==='have'?' active':''}" onclick="swTab('have')">持ってる</button><button class="tab-btn${dtab==='want'?' active':''}" onclick="swTab('want')">欲しい</button></div>`;}
+function swTab(t){dtab=t;if(view)document.getElementById('content').innerHTML=view.type==='goods'?renderGD(view.id):renderMD(view.id);}
+
+function iRow(item,label,color,subtitle){
+  const qBtn=item.status==='have'
+    ?`<div style="display:flex;gap:3px;flex-shrink:0">
+        <button onclick="quickDecrease('${item.id}')" style="background:#fff;border:0.5px solid #BA7517;border-radius:6px;cursor:pointer;color:#BA7517;font-size:11px;font-weight:500;padding:4px 8px;font-family:inherit">－</button>
+        <button onclick="quickIncrease('${item.id}')" style="background:none;border:0.5px solid #888;border-radius:6px;cursor:pointer;color:#444;font-size:11px;font-weight:500;padding:4px 8px;font-family:inherit">＋</button>
+      </div>`
+    :`<button onclick="quickGet('${item.id}')" style="background:#1A1A1A;border:none;border-radius:6px;cursor:pointer;color:#fff;font-size:11px;font-weight:500;padding:4px 8px;font-family:inherit;white-space:nowrap;flex-shrink:0">＋</button>`;
+  return`<div class="card" style="display:flex;align-items:center;gap:10px">
+    ${color?av(label,color,34):''}
+    <div style="flex:1;min-width:0">
+      <div style="font-size:15px;font-weight:500;color:#111;margin-bottom:${subtitle?2:4}px">${esc(label)}</div>
+      ${subtitle?`<div style="font-size:12px;color:#888;margin-bottom:3px">${esc(subtitle)}</div>`:''}
+      <div style="display:flex;gap:4px;flex-wrap:wrap">${ib(item)}</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:4px;flex-shrink:0">
+      ${qBtn}
+      <button onclick="editItem('${item.id}')" style="background:none;border:0.5px solid rgba(0,0,0,.2);border-radius:6px;cursor:pointer;color:#888;font-size:11px;padding:4px 8px;font-family:inherit;white-space:nowrap">編集</button>
+      <button onclick="delItem('${item.id}')" style="background:#fff;border:0.5px solid rgba(0,0,0,.15);border-radius:6px;cursor:pointer;color:#E24B4A;font-size:11px;padding:4px 8px;font-family:inherit;white-space:nowrap">削除</button>
+    </div>
+  </div>`;
+}
+
+// ── add/edit form ──
+function renderForm(item){
+  if(!data.members.length)return`<p class="empty">先に設定からメンバーを<br>追加してください</p>`;
+  if(!data.goodsTypes.length)return`<p class="empty">先に設定からグッズの種類を<br>追加してください</p>`;
+  const go=data.goodsTypes.map(g=>`<option value="${g.id}"${item.goodsTypeId===g.id?' selected':''}>${esc(g.name)}</option>`).join('');
+  const sgt=item.goodsTypeId?data.goodsTypes.find(g=>g.id===item.goodsTypeId):null;
+  return`<div style="padding-bottom:20px">
+    <label class="lbl">グッズの種類</label>
+    <select id="fG" onchange="onGC(this.value)"><option value="">選択してください</option>${go}</select>
+    <label class="lbl">グッズタイトル（任意）</label>
+    <div style="position:relative">
+      <input type="text" id="fTitle" value="${esc(item.title||'')}" placeholder="例：2024ライブ衣装" autocomplete="off" oninput="showTitleSug('fTitle','fTitleSug',document.getElementById('fG').value)" onfocus="showTitleSug('fTitle','fTitleSug',document.getElementById('fG').value)" onblur="setTimeout(()=>{const el=document.getElementById('fTitleSug');if(el)el.style.display='none'},180)">
+      <div id="fTitleSug" style="display:none;position:absolute;top:100%;left:0;right:0;background:#fff;border:0.5px solid #D8D8D8;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,.1);z-index:20;overflow:hidden;margin-top:3px"></div>
+    </div>
+    <div id="subA">${buildSub(sgt,item.subType||'')}</div>
+    <label class="lbl">メンバー</label>
+    <div id="fMemberPicker">${buildMemberPicker(item.memberId||'')}</div>
+    <input type="hidden" id="fM" value="${esc(item.memberId||'')}">
+    <label class="lbl">ステータス</label>
+    <div style="display:flex;gap:8px">
+      <button class="btn-toggle${item.status==='have'?' active':''}" id="btnH" onclick="setSt('have')">持ってる</button>
+      <button class="btn-toggle${item.status==='want'?' active':''}" id="btnW" onclick="setSt('want')">欲しい</button>
+    </div>
+    <div id="qA">${buildQty(item.status,item.quantity||1,item.labels||[])}</div>
+    <input type="hidden" id="fSt" value="${item.status}">
+    <input type="hidden" id="fQ" value="${item.quantity||1}">
+    <input type="hidden" id="fL" value="${(item.labels||[]).join(',')}">
+    <input type="hidden" id="fSub" value="${esc(item.subType||'')}">
+    <input type="hidden" id="fId" value="${item.id||''}">
+    <button class="btn-primary" style="margin-top:22px" onclick="submitF()">${item.id?'更新する':'登録する'}</button>
+  </div>`;
+}
+
+function buildMemberPicker(selectedId){
+  // Build group tabs
+  const hasGroups=data.groups.length>0;
+  const allTab={id:'__all__',name:'すべて'};
+  const tabs=hasGroups?[allTab,...data.groups]:[];
+  const activeTabId=window._fMTab!==undefined?window._fMTab:(hasGroups?data.groups[0]?.id||'__all__':'__all__');
+  window._fMTab=activeTabId;
+
+  let members;
+  if(!hasGroups||activeTabId==='__all__'){
+    members=sortMembers(data.members);
+  }else{
+    members=sortMembers(data.members.filter(m=>m.groupId===activeTabId));
+  }
+
+  const tabsHtml=hasGroups?`<div style="display:flex;gap:0;overflow-x:auto;margin-bottom:10px;border-bottom:0.5px solid #EBEBEB;-webkit-overflow-scrolling:touch;scrollbar-width:none">
+    ${tabs.map(t=>{
+      const active=activeTabId===t.id;
+      const color=t.id==='__all__'?'#111':groupColor(t);
+      return`<button onclick="window._fMTab='${t.id}';document.getElementById('fMemberPicker').innerHTML=buildMemberPicker(document.getElementById('fM').value)" style="padding:8px 14px;background:none;border:none;border-bottom:2px solid ${active?(t.id==='__all__'?'#111':color):'transparent'};cursor:pointer;font-size:13px;color:${active?(t.id==='__all__'?'#111':color):'#aaa'};font-weight:${active?'600':'400'};white-space:nowrap;font-family:inherit;flex-shrink:0">${esc(t.name)}</button>`;
+    }).join('')}
+  </div>`:'';
+
+  const memberCards=members.map(m=>{
+    const idx=data.members.findIndex(x=>x.id===m.id);
+    const color=mc(idx);
+    const sel=selectedId===m.id;
+    return`<button onclick="selectMember('${m.id}')" style="display:flex;align-items:center;gap:8px;width:100%;padding:9px 10px;border-radius:9px;border:0.5px solid ${sel?'#1A1A1A':'#EBEBEB'};background:${sel?'#F0F0EF':'#fff'};cursor:pointer;margin-bottom:5px;text-align:left;font-family:inherit;transition:border-color .1s">
+      ${av(m.name,color,28)}
+      <span style="font-size:14px;font-weight:${sel?'600':'400'};color:${sel?'#111':'#333'};flex:1">${esc(m.name)}${m.gen?`<span style="font-size:10px;background:#f0f0f0;color:#777;border-radius:100px;padding:1px 5px;margin-left:5px;font-weight:400">${m.gen}期</span>`:''}</span>
+      ${sel?`<span style="font-size:14px;color:#111">✓</span>`:''}
+    </button>`;
+  }).join('');
+
+  return`${tabsHtml}<div style="max-height:240px;overflow-y:auto;-webkit-overflow-scrolling:touch">${memberCards||`<p style="text-align:center;color:#bbb;font-size:13px;padding:20px 0">メンバーがいません</p>`}</div>`;
+}
+
+function selectMember(mId){
+  document.getElementById('fM').value=mId;
+  document.getElementById('fMemberPicker').innerHTML=buildMemberPicker(mId);
+}
+function buildSub(gt,cur){
+  if(!gt?.subTypes?.length)return'';
+  return`<div><label class="lbl">タイプ</label><div style="display:flex;gap:6px">${gt.subTypes.map(t=>`<button class="sub-btn${cur===t?' active':''}" onclick="setSubT('${esc(t)}')">${esc(t)}</button>`).join('')}</div></div>`;
+}
+function buildQty(status,qty,labels){
+  if(status!=='have')return'';
+  return`<div><label class="lbl">数量</label><div style="display:flex;align-items:center;gap:20px"><button class="btn-qty" id="btnM">−</button><span id="qtyV" style="font-size:24px;font-weight:500;min-width:32px;text-align:center;color:#111">${qty}</span><button class="btn-qty" id="btnP">＋</button></div><label class="lbl">ラベル（複数選択可）</label><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn-label${labels.includes('trade')?' at':''}" id="btnTrade">トレード用</button><button class="btn-label${labels.includes('share')?' as':''}" id="btnShare">お裾分け用</button></div></div>`;
+}
+function attachEv(){
+  const m=document.getElementById('btnM'),p=document.getElementById('btnP');
+  const t=document.getElementById('btnTrade'),s=document.getElementById('btnShare');
+  if(m){m.onclick=()=>{const v=Math.max(1,parseInt(document.getElementById('fQ').value)-1);document.getElementById('fQ').value=v;document.getElementById('qtyV').textContent=v;};
+       p.onclick=()=>{const v=parseInt(document.getElementById('fQ').value)+1;document.getElementById('fQ').value=v;document.getElementById('qtyV').textContent=v;};}
+  if(t){t.onclick=()=>togL('trade');s.onclick=()=>togL('share');}
+}
+function onGC(gtId){const gt=data.goodsTypes.find(g=>g.id===gtId);document.getElementById('subA').innerHTML=buildSub(gt,'');document.getElementById('fSub').value='';showTitleSug('fTitle','fTitleSug',gtId);}
+function showTitleSug(inputId,sugId,gtId){
+  const inp=document.getElementById(inputId);const sug=document.getElementById(sugId);
+  if(!inp||!sug)return;
+  const gt=data.goodsTypes.find(g=>g.id===gtId);
+  const titles=gt?.titles||[];
+  const q=inp.value.trim().toLowerCase();
+  const filtered=titles.filter(t=>!q||t.toLowerCase().includes(q));
+  if(!filtered.length){sug.style.display='none';return;}
+  sug.innerHTML=filtered.map(t=>`<div onclick="document.getElementById('${inputId}').value='${esc(t).replace(/'/g,"\\'")}';document.getElementById('${sugId}').style.display='none'" style="padding:10px 14px;font-size:14px;color:#111;cursor:pointer;border-bottom:0.5px solid #F0F0F0" ontouchstart="this.style.background='#F7F7F6'" ontouchend="this.style.background=''">${esc(t)}</div>`).join('');
+  sug.style.display='block';
+}
+function setSubT(t){document.getElementById('fSub').value=t;document.querySelectorAll('.sub-btn').forEach(b=>b.className='sub-btn'+(b.textContent===t?' active':''));}
+function setSt(s){document.getElementById('fSt').value=s;document.getElementById('btnH').className='btn-toggle'+(s==='have'?' active':'');document.getElementById('btnW').className='btn-toggle'+(s==='want'?' active':'');const qty=parseInt(document.getElementById('fQ').value)||1;const labels=(document.getElementById('fL').value||'').split(',').filter(Boolean);document.getElementById('qA').innerHTML=buildQty(s,qty,labels);attachEv();}
+function togL(l){const el=document.getElementById('fL');let ls=(el.value||'').split(',').filter(Boolean);ls=ls.includes(l)?ls.filter(x=>x!==l):[...ls,l];el.value=ls.join(',');const bn=document.getElementById('btn'+l.charAt(0).toUpperCase()+l.slice(1));if(bn)bn.className='btn-label'+(ls.includes(l)?l==='trade'?' at':' as':'');}
+function submitF(){
+  const mId=document.getElementById('fM').value,gId=document.getElementById('fG').value;
+  if(!mId){alert('メンバーを選んでください');return;}
+  if(!gId){alert('グッズの種類を選んでください');return;}
+  const gt=data.goodsTypes.find(g=>g.id===gId);
+  const sub=document.getElementById('fSub')?.value||'';
+  if(gt?.subTypes?.length&&!sub){alert('タイプを選んでください');return;}
+  const status=document.getElementById('fSt').value;
+  const quantity=parseInt(document.getElementById('fQ').value)||1;
+  const labels=(document.getElementById('fL').value||'').split(',').filter(Boolean);
+  const id=document.getElementById('fId').value||undefined;
+  const title=document.getElementById('fTitle')?.value.trim()||'';
+  const item={id,memberId:mId,goodsTypeId:gId,status,quantity,labels,subType:sub||undefined,title:title||undefined};
+  if(id)data.items=data.items.map(i=>i.id===id?{...item,id}:i);else data.items.push({...item,id:uid()});
+  saveData();editing=null;render();
+}
+
+// ── settings ──
+function renderSettingsTop(){
+  const mCount=data.members.length;
+  const gCount=data.goodsTypes.length;
+  return`<div style="margin-top:4px">
+    <div class="card tap" style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;padding:14px 16px;margin-bottom:8px" onclick="settingsTab='members';settingEdit=null;render()">
+      <div>
+        <div style="font-size:16px;font-weight:500;color:#111">グループ・メンバー</div>
+        <div style="font-size:12px;color:#aaa;margin-top:2px">${data.groups.length}グループ・${mCount}人</div>
+      </div>
+      ›
+    </div>
+    <div class="card tap" style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;padding:14px 16px" onclick="settingsTab='goodsTypes';settingEdit=null;render()">
+      <div>
+        <div style="font-size:16px;font-weight:500;color:#111">グッズの種類</div>
+        <div style="font-size:12px;color:#aaa;margin-top:2px">${gCount}種類</div>
+      </div>
+      ›
+    </div>
+  </div>`;
+}
+
+function renderSettingsMembers(){
+  // Tab bar: 全員 + each group + ＋
+  const tabs=[{id:null,name:'全員'},...data.groups,{id:'new',name:'＋'}];
+  let h=`<div style="display:flex;gap:6px;overflow-x:auto;padding-bottom:2px;margin-bottom:12px;-webkit-overflow-scrolling:touch;scrollbar-width:none">
+    ${tabs.map(t=>{
+      const active=membersSettingsTab===t.id;
+      const isNew=t.id==='new';
+      const c=(t.id&&t.id!=='new')?groupColor(t):'#7F77DD';
+      return`<button onclick="setMembersTab(${t.id===null?'null':t.id==='new'?`'new'`:`'${t.id}'`})" style="padding:5px ${isNew?'10':'14'}px;border-radius:100px;border:0.5px solid ${active?c:'rgba(0,0,0,.15)'};background:${active?c+'22':'none'};color:${active?c:'#888'};font-size:${isNew?'18':'12'}px;font-weight:${active?500:400};cursor:pointer;font-family:inherit;white-space:nowrap;flex-shrink:0;line-height:1">${esc(t.name)}</button>`;
+    }).join('')}
+  </div>`;
+
+  // 編集/保存ボタン
+  if(settingsEditMode){
+    h+=`<div style="display:flex;gap:8px;justify-content:flex-end;margin-bottom:10px">
+      <button onclick="cancelAllEdits()" style="background:none;border:0.5px solid rgba(0,0,0,.2);border-radius:8px;cursor:pointer;color:#888;font-size:13px;padding:6px 14px;font-family:inherit">キャンセル</button>
+      <button onclick="saveAllEdits()" style="background:#1A1A1A;border:none;border-radius:8px;cursor:pointer;color:#fff;font-size:13px;font-weight:500;padding:6px 16px;font-family:inherit">保存</button>
+    </div>`;
+  }else{
+    h+=`<div style="display:flex;justify-content:flex-end;margin-bottom:10px">
+      <button onclick="toggleSettingsEditMode()" style="background:none;border:0.5px solid rgba(0,0,0,.2);border-radius:8px;cursor:pointer;color:#555;font-size:13px;padding:6px 16px;font-family:inherit">編集</button>
+    </div>`;
+  }
+  // ＋ tab: add new group
+  if(membersSettingsTab==='new'){
+    h+=`<div style="background:#fff;border-radius:12px;border:0.5px solid rgba(0,0,0,.1);padding:14px">
+      <div style="font-size:13px;color:#888;margin-bottom:10px">グループ名を入力してください</div>
+      <div style="display:flex;gap:8px">
+        <input type="text" id="inG" placeholder="例：AKB48" style="flex:1;border:0.5px solid rgba(0,0,0,.25);border-radius:8px;padding:10px 12px;font-size:16px;background:#fff;color:#111;font-family:inherit;outline:none;-webkit-appearance:none" onkeydown="if(event.key==='Enter')addGAndSwitch()">
+        <button onclick="addGAndSwitch()" style="padding:8px 16px;border:none;border-radius:8px;background:#1A1A1A;cursor:pointer;color:#fff;white-space:nowrap;font-size:14px;font-family:inherit;font-weight:500">追加</button>
+      </div>
+    </div>`;
+    return h;
+  }
+
+  if(settingsEditMode&&membersSettingsTab!==null){
+    const g=data.groups.find(g=>g.id===membersSettingsTab);
+    if(g){
+      if(pendingDelete?.type==='group'&&pendingDelete?.id===g.id){
+        h+=`<div style="background:#FFF5F5;border-radius:10px;padding:12px 14px;margin-bottom:10px">
+          <div style="font-size:13px;color:#E24B4A;margin-bottom:8px">⚠️ グループ「<b>${esc(g.name)}</b>」を削除しますか？<br><span style="font-size:11px;color:#aaa">メンバーのグループ割り当ては解除されます</span></div>
+          <div style="display:flex;gap:8px">
+            <button onclick="execDelG('${g.id}')" style="flex:1;background:#E24B4A;border:none;border-radius:6px;cursor:pointer;color:#fff;font-size:13px;font-weight:500;padding:7px;font-family:inherit">削除する</button>
+            <button onclick="pendingDelete=null;document.getElementById('content').innerHTML=renderSettingsMembers()" style="flex:1;background:none;border:0.5px solid rgba(0,0,0,.2);border-radius:6px;cursor:pointer;color:#888;font-size:13px;padding:7px;font-family:inherit">キャンセル</button>
+          </div>
+        </div>`;
+      }else{
+        h+=`<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+          <span style="font-size:12px;color:#999;white-space:nowrap">グループ名</span>
+          <input data-edit-group="${g.id}" type="text" value="${esc(g.name)}" style="flex:1;border:0.5px solid rgba(0,0,0,.2);border-radius:7px;padding:6px 10px;font-size:14px;background:#fff;color:#111;outline:none;font-family:inherit">
+          <button onclick="pendingDelete={type:'group',id:'${g.id}'};document.getElementById('content').innerHTML=renderSettingsMembers()" style="background:none;border:0.5px solid rgba(224,75,74,.4);border-radius:6px;cursor:pointer;color:#E24B4A;font-size:11px;padding:4px 8px;font-family:inherit;white-space:nowrap;flex-shrink:0">グループ削除</button>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+          <span style="font-size:12px;color:#999;white-space:nowrap">カラー</span>
+          <div style="display:flex;gap:6px;flex-wrap:wrap">
+            ${GROUP_PAL.map(c=>`<button onclick="setGroupColor('${g.id}','${c}')" style="width:26px;height:26px;border-radius:50%;background:${c};border:${groupColor(g)===c?`3px solid #111`:'2px solid transparent'};cursor:pointer;padding:0;flex-shrink:0;outline:none"></button>`).join('')}
+          </div>
+        </div>`;
+      }
+    }
+  }
+
+  // Member list
+  const cardStyle='background:#fff;border-radius:12px;border:0.5px solid rgba(0,0,0,.1);margin-bottom:10px;overflow:hidden';
+  const members=membersSettingsTab===null
+    ?sortMembers(data.members)
+    :sortMembers(data.members.filter(m=>m.groupId===membersSettingsTab));
+
+  if(membersSettingsTab===null){
+    // 全員タブ: 追加入力を上に
+    h+=`<div class="sec-head">グループなしのメンバーを追加</div>`;
+    h+=`<div style="${cardStyle}">${addInputRow('nogroup')}</div>`;
+    if(members.length){
+      const genGroups=buildGenGroups(members);
+      const multiGen=genGroups.length>1||(genGroups.length===1&&genGroups[0].gen!==null);
+      if(multiGen){
+        genGroups.forEach(grp=>{
+          const key=`set_gen_${grp.gen||'none'}`;
+          const open=!openAccordions.has('close_'+key);
+          const label=grp.gen?`${grp.gen}期`:'期不明';
+          h+=`<div style="margin-bottom:8px">
+            <button onclick="toggleGenAccordion('${key}')" style="width:100%;display:flex;align-items:center;justify-content:space-between;padding:9px 12px;background:#fff;border:0.5px solid #EBEBEB;border-radius:${open?'10px 10px 0 0':'10px'};cursor:pointer;font-family:inherit">
+              <span style="font-size:13px;font-weight:600;color:#555">${label}</span>
+              <div style="display:flex;align-items:center;gap:8px">
+                <span style="font-size:11px;color:#bbb">${grp.members.length}人</span>
+                <span style="font-size:12px;color:#bbb">${open?'▲':'▼'}</span>
+              </div>
+            </button>
+            ${open?`<div style="background:#fff;border:0.5px solid #EBEBEB;border-top:none;border-radius:0 0 10px 10px;overflow:hidden">${grp.members.map(m=>memberSettingRow(m)).join('')}</div>`:''}
+          </div>`;
+        });
+      }else{
+        h+=`<div style="${cardStyle}">`;
+        members.forEach(m=>h+=memberSettingRow(m));
+        h+=`</div>`;
+      }
+    }else{
+      h+=`<p style="text-align:center;color:#bbb;font-size:13px;padding:14px 0">まだメンバーが登録されていません</p>`;
+    }
+  }else{
+    // グループタブ: 期別アコーディオン
+    const genGroups=buildGenGroups(members);
+    const multiGen=genGroups.length>1||(genGroups.length===1&&genGroups[0].gen!==null);
+    h+=multiGen?'':(`<div style="${cardStyle}">`+addInputRow(membersSettingsTab));
+    if(multiGen){
+      h+=`<div style="${cardStyle}">${addInputRow(membersSettingsTab)}</div>`;
+      genGroups.forEach(grp=>{
+        const key=`set_gen_${membersSettingsTab}_${grp.gen||'none'}`;
+        const open=!openAccordions.has('close_'+key);
+        const label=grp.gen?`${grp.gen}期`:'期不明';
+        h+=`<div style="margin-bottom:8px">
+          <button onclick="toggleGenAccordion('${key}')" style="width:100%;display:flex;align-items:center;justify-content:space-between;padding:9px 12px;background:#fff;border:0.5px solid #EBEBEB;border-radius:${open?'10px 10px 0 0':'10px'};cursor:pointer;font-family:inherit">
+            <span style="font-size:13px;font-weight:600;color:#555">${label}</span>
+            <div style="display:flex;align-items:center;gap:8px">
+              <span style="font-size:11px;color:#bbb">${grp.members.length}人</span>
+              <span style="font-size:12px;color:#bbb">${open?'▲':'▼'}</span>
+            </div>
+          </button>
+          ${open?`<div style="background:#fff;border:0.5px solid #EBEBEB;border-top:none;border-radius:0 0 10px 10px;overflow:hidden">${grp.members.map(m=>memberSettingRow(m)).join('')}</div>`:''}
+        </div>`;
+      });
+    }else{
+      if(members.length)members.forEach(m=>h+=memberSettingRow(m));
+      else h+=`<p style="text-align:center;color:#bbb;font-size:13px;padding:14px 0">まだメンバーがいません</p>`;
+      h+=`</div>`;
+    }
+  }
+
+  return h;
+}
+
+function execDelM(id){data.members=data.members.filter(m=>m.id!==id);data.items=data.items.filter(i=>i.memberId!==id);pendingDelete=null;saveData();document.getElementById('content').innerHTML=renderSettingsMembers();}
+function execDelG(id){data.groups=data.groups.filter(g=>g.id!==id);data.members=data.members.map(m=>m.groupId===id?{...m,groupId:undefined}:m);membersSettingsTab=null;pendingDelete=null;saveData();render();}
+function saveAllEdits(){
+  // Save group name
+  document.querySelectorAll('[data-edit-group]').forEach(el=>{
+    const gId=el.dataset.editGroup,val=el.value.trim();
+    if(val)data.groups=data.groups.map(g=>g.id===gId?{...g,name:val}:g);
+  });
+  // Save member names
+  document.querySelectorAll('[data-edit-gen]').forEach(el=>{
+    const mId=el.dataset.editGen,val=parseInt(el.value);
+    data.members=data.members.map(m=>m.id===mId?{...m,gen:val||undefined}:m);
+  });
+  document.querySelectorAll('[data-edit-member]').forEach(el=>{
+    const mId=el.dataset.editMember,val=el.value.trim();
+    if(val)data.members=data.members.map(m=>m.id===mId?{...m,name:val}:m);
+  });
+  settingsEditMode=false;saveData();
+  document.getElementById('content').innerHTML=renderSettingsMembers();
+}
+function cancelAllEdits(){settingsEditMode=false;document.getElementById('content').innerHTML=renderSettingsMembers();}
+function toggleSettingsEditMode(){settingsEditMode=!settingsEditMode;settingEdit=null;document.getElementById('content').innerHTML=renderSettingsMembers();}
+function delMConfirm(id){if(!confirm('削除しますか？\n⚠️ このメンバーに紐づくグッズ情報もすべて削除されます'))return;data.members=data.members.filter(m=>m.id!==id);data.items=data.items.filter(i=>i.memberId!==id);saveData();document.getElementById('content').innerHTML=renderSettingsMembers();}
+function setMembersTab(id){membersSettingsTab=id;settingEdit=null;document.getElementById('content').innerHTML=renderSettingsMembers();}
+function saveEditG(id){const val=document.getElementById('settingEditInput')?.value.trim();if(!val)return;data.groups=data.groups.map(x=>x.id===id?{...x,name:val}:x);settingEdit=null;saveData();document.getElementById('content').innerHTML=renderSettingsMembers();setTimeout(()=>{},50);}
+function addGAndSwitch(){const v=document.getElementById('inG')?.value.trim();if(!v)return;const id=uid();data.groups.push({id,name:v});saveData();membersSettingsTab=id;render();}
+function delGAndReset(id){if(!confirm('グループを削除しますか？\n（メンバーのグループ割り当ては解除されます）'))return;data.groups=data.groups.filter(g=>g.id!==id);data.members=data.members.map(m=>m.groupId===id?{...m,groupId:undefined}:m);membersSettingsTab=null;saveData();render();}
+
+function renderSettingsGoods(){
+  const expandedId=window._gtExpanded||null;
+  const tr=data.goodsTypes.map(g=>{
+    const isEditing=settingEdit?.type==='goodsType'&&settingEdit?.id===g.id;
+    if(isEditing)return`<div class="card" style="display:flex;align-items:center;gap:8px;padding:10px 12px;margin-bottom:6px">
+      <input id="settingEditInput" type="text" value="${esc(g.name)}" style="flex:1;border:0.5px solid #111;border-radius:8px;padding:8px 10px;font-size:15px;background:#fff;color:#111;outline:none;font-family:inherit" onkeydown="if(event.key==='Enter')saveEdit('goodsType','${g.id}')">
+      <button onclick="saveEdit('goodsType','${g.id}')" style="background:#1A1A1A;border:none;border-radius:6px;cursor:pointer;color:#fff;font-size:12px;font-weight:500;padding:5px 10px;font-family:inherit;white-space:nowrap">保存</button>
+      <button onclick="cancelEdit()" style="background:none;border:0.5px solid rgba(0,0,0,.2);border-radius:6px;cursor:pointer;color:#888;font-size:12px;padding:5px 10px;font-family:inherit">×</button>
+    </div>`;
+    const isExpanded=expandedId===g.id;
+    const titles=g.titles||[];
+    const titlesHtml=isExpanded?`<div style="padding:10px 12px 12px;border-top:0.5px solid #EBEBEB;background:#FAFAFA;border-radius:0 0 11px 11px">
+      <div style="font-size:11px;color:#999;font-weight:500;margin-bottom:8px;letter-spacing:.3px">登録済みタイトル</div>
+      ${titles.length?titles.map(t=>`<div style="display:flex;align-items:center;gap:6px;margin-bottom:5px">
+        <span style="flex:1;font-size:13px;color:#333;background:#fff;border:0.5px solid #EBEBEB;border-radius:6px;padding:5px 9px">${esc(t)}</span>
+        <button onclick="delGT('${g.id}','${esc(t)}')" style="background:none;border:none;cursor:pointer;color:#ccc;font-size:16px;padding:2px 4px;line-height:1;flex-shrink:0">×</button>
+      </div>`).join(''):`<p style="font-size:12px;color:#bbb;margin-bottom:8px">まだタイトルが登録されていません</p>`}
+      <div style="display:flex;gap:6px;margin-top:6px">
+        <input type="text" id="inGT_${g.id}" placeholder="タイトルを追加" style="flex:1;border:0.5px solid rgba(0,0,0,.2);border-radius:7px;padding:7px 10px;font-size:13px;background:#fff;color:#111;font-family:inherit;outline:none;-webkit-appearance:none" onkeydown="if(event.key==='Enter')addGT('${g.id}')">
+        <button onclick="addGT('${g.id}')" style="padding:6px 12px;border:0.5px solid rgba(0,0,0,.2);border-radius:7px;background:none;cursor:pointer;color:#111;font-size:13px;font-family:inherit;white-space:nowrap">追加</button>
+      </div>
+    </div>`:'';
+    return`<div class="card" style="padding:0;margin-bottom:6px;overflow:hidden">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px">
+        <div style="flex:1;min-width:0">
+          <span style="font-size:15px;color:#111">${esc(g.name)}</span>
+          ${g.subTypes?.length?`<div style="margin-top:3px">${g.subTypes.map(t=>`<span class="bdg bdg-sub" style="font-size:10px;margin-right:3px">${esc(t)}</span>`).join('')}</div>`:''}
+          ${titles.length?`<div style="margin-top:3px;font-size:11px;color:#aaa">${titles.slice(0,3).map(t=>esc(t)).join('・')}${titles.length>3?`他${titles.length-3}件`:''}</div>`:''}
+        </div>
+        <div style="display:flex;gap:4px;align-items:center;flex-shrink:0">
+          <button onclick="toggleGTExpand('${g.id}')" style="background:none;border:0.5px solid rgba(0,0,0,.15);border-radius:6px;cursor:pointer;color:#555;font-size:11px;padding:3px 8px;font-family:inherit;white-space:nowrap">${isExpanded?'▲ 閉じる':'タイトル'}</button>
+          <button onclick="startEdit('goodsType','${g.id}')" style="background:none;border:0.5px solid rgba(0,0,0,.2);border-radius:6px;cursor:pointer;color:#888;font-size:11px;padding:3px 8px;font-family:inherit">変更</button>
+          <button class="btn-icon" onclick="delT('${g.id}')">×</button>
+        </div>
+      </div>
+      ${titlesHtml}
+    </div>`;
+  }).join('');
+  return`<div style="display:flex;gap:8px;margin-bottom:10px"><input type="text" id="inT" placeholder="種類名（例：アクスタ）" style="flex:1;border:0.5px solid rgba(0,0,0,.25);border-radius:8px;padding:10px 12px;font-size:16px;background:#fff;color:#111;font-family:inherit;outline:none;-webkit-appearance:none" onkeydown="if(event.key==='Enter')addT()"><button onclick="addT()" style="padding:8px 14px;border:0.5px solid rgba(0,0,0,.2);border-radius:8px;background:none;cursor:pointer;color:#111;white-space:nowrap;font-size:14px;font-family:inherit">追加</button></div>${tr}`;
+}
+function toggleGTExpand(id){window._gtExpanded=(window._gtExpanded===id?null:id);document.getElementById('content').innerHTML=renderSettingsGoods();setTimeout(()=>{const el=document.getElementById('inGT_'+id);if(el)el.focus();},50);}
+function addGT(gtId){const el=document.getElementById('inGT_'+gtId);const v=el?.value.trim();if(!v)return;const gt=data.goodsTypes.find(g=>g.id===gtId);if(!gt)return;if(!gt.titles)gt.titles=[];if(!gt.titles.includes(v))gt.titles.push(v);saveData();document.getElementById('content').innerHTML=renderSettingsGoods();}
+function delGT(gtId,title){data.goodsTypes=data.goodsTypes.map(g=>g.id===gtId?{...g,titles:(g.titles||[]).filter(t=>t!==title)}:g);saveData();document.getElementById('content').innerHTML=renderSettingsGoods();}
+
+function memberSettingRow(m){
+  const idx=data.members.findIndex(x=>x.id===m.id);
+  const color=PAL[idx%PAL.length];
+
+  if(settingsEditMode){
+    const gOpts=[{id:'',name:'グループなし'},...data.groups].map(g=>`<option value="${g.id}"${(m.groupId||'')===(g.id)?'selected':''}>${esc(g.name)}</option>`).join('');
+    // Inline delete confirmation
+    if(pendingDelete?.type==='member'&&pendingDelete?.id===m.id){
+      return`<div style="padding:10px 12px;border-bottom:0.5px solid rgba(0,0,0,.06);background:#FFF5F5">
+        <div style="font-size:13px;color:#E24B4A;margin-bottom:8px">⚠️ <b>${esc(m.name)}</b> を削除しますか？<br><span style="font-size:11px;color:#aaa">紐づくグッズ情報もすべて削除されます</span></div>
+        <div style="display:flex;gap:8px">
+          <button onclick="execDelM('${m.id}')" style="flex:1;background:#E24B4A;border:none;border-radius:6px;cursor:pointer;color:#fff;font-size:13px;font-weight:500;padding:7px;font-family:inherit">削除する</button>
+          <button onclick="pendingDelete=null;document.getElementById('content').innerHTML=renderSettingsMembers()" style="flex:1;background:none;border:0.5px solid rgba(0,0,0,.2);border-radius:6px;cursor:pointer;color:#888;font-size:13px;padding:7px;font-family:inherit">キャンセル</button>
+        </div>
+      </div>`;
+    }
+    return`<div style="display:flex;align-items:center;gap:6px;padding:8px 12px;border-bottom:0.5px solid rgba(0,0,0,.06)">
+      ${av(m.name,color,28)}
+      <input data-edit-member="${m.id}" type="text" value="${esc(m.name)}" style="flex:1;border:0.5px solid rgba(0,0,0,.2);border-radius:7px;padding:6px 10px;font-size:14px;background:#fff;color:#111;outline:none;font-family:inherit;min-width:0">
+      <input data-edit-gen="${m.id}" type="number" min="1" max="99" value="${m.gen||''}" placeholder="期" style="width:50px;border:0.5px solid rgba(0,0,0,.2);border-radius:7px;padding:6px 8px;font-size:14px;background:#fff;color:#111;outline:none;font-family:inherit;flex-shrink:0;-webkit-appearance:none">
+      <select onchange="setMG('${m.id}',this.value)" style="font-size:11px;padding:3px 22px 3px 7px;border-radius:6px;border:0.5px solid rgba(0,0,0,.18);background:#fff;color:#666;font-family:inherit;flex-shrink:0;max-width:88px">${gOpts}</select>
+      <button onclick="pendingDelete={type:'member',id:'${m.id}'};document.getElementById('content').innerHTML=renderSettingsMembers()" style="background:none;border:none;cursor:pointer;color:#ddd;font-size:18px;padding:2px 4px;display:flex;align-items:center;flex-shrink:0">×</button>
+    </div>`;
+  }
+
+  // Normal mode: clean display with oshi toggle only
+  return`<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:0.5px solid rgba(0,0,0,.06)">
+    ${av(m.name,color,34)}
+    <div style="flex:1;min-width:0">
+      <span style="font-size:15px;font-weight:500;color:#111">${esc(m.name)}</span>
+      ${m.gen?`<div style="margin-top:2px">${genBadge(m)}</div>`:''}
+    </div>
+    <button onclick="toggleOshi('${m.id}')" style="background:none;border:none;cursor:pointer;font-size:20px;padding:2px 4px;color:${m.isOshi?'#F59E0B':'#d1d5db'};flex-shrink:0">${m.isOshi?'★':'☆'}</button>
+  </div>`;
+}
+
+function addInputRow(gId){
+  return`<div style="display:flex;gap:6px;padding:8px 12px;background:rgba(0,0,0,.02)">
+    <input type="text" id="inMG_${gId}" placeholder="メンバー名を追加" style="flex:1;border:0.5px solid rgba(0,0,0,.18);border-radius:6px;padding:6px 10px;font-size:14px;background:#fff;color:#111;font-family:inherit;outline:none;-webkit-appearance:none">
+    <button onclick="addMG('${gId}')" style="padding:6px 12px;border:0.5px solid rgba(0,0,0,.18);border-radius:6px;background:none;cursor:pointer;color:#111;font-size:13px;font-family:inherit;white-space:nowrap">追加</button>
+  </div>`;
+}
+
+function startEdit(type,id){settingEdit={type,id};render();setTimeout(()=>{const el=document.getElementById('settingEditInput');if(el){el.focus();el.select();}},50);}
+function cancelEdit(){settingEdit=null;render();}
+function saveEdit(type,id){
+  const val=document.getElementById('settingEditInput')?.value.trim();
+  if(!val)return;
+  if(type==='group')data.groups=data.groups.map(x=>x.id===id?{...x,name:val}:x);
+  else if(type==='member')data.members=data.members.map(x=>x.id===id?{...x,name:val}:x);
+  else if(type==='goodsType')data.goodsTypes=data.goodsTypes.map(x=>x.id===id?{...x,name:val}:x);
+  settingEdit=null;saveData();render();
+}
+
+function addG(){const v=document.getElementById('inG').value.trim();if(!v)return;data.groups.push({id:uid(),name:v});saveData();render();}
+function addMG(gId){const v=document.getElementById('inMG_'+gId)?.value.trim();if(!v)return;const m={id:uid(),name:v};if(gId&&gId!=='nogroup')m.groupId=gId;data.members.push(m);saveData();render();}
+function delG(id){if(!confirm('削除しますか？\n（メンバーのグループ割り当ては解除されます）'))return;data.groups=data.groups.filter(g=>g.id!==id);data.members=data.members.map(m=>m.groupId===id?{...m,groupId:undefined}:m);saveData();render();}
+function setMG(mId,gId){data.members=data.members.map(m=>m.id===mId?{...m,groupId:gId||undefined}:m);saveData();}
+function addM(){const v=document.getElementById('inM').value.trim();if(!v)return;data.members.push({id:uid(),name:v});saveData();render();}
+function delM(id){if(!confirm('削除しますか？\n（このメンバーのグッズ登録も削除されます）'))return;data.members=data.members.filter(m=>m.id!==id);data.items=data.items.filter(i=>i.memberId!==id);saveData();render();}
+function addT(){const v=document.getElementById('inT').value.trim();if(!v)return;data.goodsTypes.push({id:uid(),name:v});saveData();render();}
+function delT(id){if(!confirm('削除しますか？\n（このグッズ種類の登録も削除されます）'))return;data.goodsTypes=data.goodsTypes.filter(g=>g.id!==id);data.items=data.items.filter(i=>i.goodsTypeId!==id);saveData();render();}
+
+function setTab(t){view=null;editing=null;bulkMode=false;dtab='have';actionItemId=null;gdGroupFilter=null;mlGroupFilter=null;tab=t;render();}
+function openView(type,id){view={type,id};editing=null;dtab='have';actionItemId=null;openAccordions=new Set();mdFilter='all';gdGroupFilter=null;render();}
+function startAdd(item){actionItemId=null;window._fMTab=undefined;editing=item;render();}
+function editItem(id){actionItemId=null;const item=data.items.find(i=>i.id===id);if(item)editing={...item};render();}
+function delItem(id){if(!confirm('削除しますか？'))return;data.items=data.items.filter(i=>i.id!==id);actionItemId=null;saveData();if(view)document.getElementById('content').innerHTML=view.type==='goods'?renderGD(view.id):renderMD(view.id);else render();}
+function goBack(){
+  if(bulkMode){bulkMode=false;window._bfMTab=undefined;window._bfChecked={};window._bfPresetTitle=undefined;render();return;}
+  if(editing){editing=null;render();return;}
+  if(view){view=null;dtab='have';actionItemId=null;render();return;}
+  if(settingsTab){settingsTab=null;settingEdit=null;render();return;}
+}
+render();
+</script>
+</body>
+</html>
